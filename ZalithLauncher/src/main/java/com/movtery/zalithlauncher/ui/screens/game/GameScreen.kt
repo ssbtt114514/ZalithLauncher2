@@ -353,6 +353,8 @@ private class GameViewModel(
         mouseScrollDownEvent.cancel()
         gameTextSender.cancel()
         onChangeTextInputMode(TextInputMode.DISABLE)
+        moveOnlyPointers.clear()
+        occupiedPointers.clear()
     }
 
     init {
@@ -694,6 +696,9 @@ fun GameScreen(
 
         LogBox(
             enableLog = !viewModel.isEditingLayout && logState.value,
+            onClose = {
+                onLogStateChange(LogState.CLOSE)
+            },
             modifier = Modifier.fillMaxSize()
         )
 

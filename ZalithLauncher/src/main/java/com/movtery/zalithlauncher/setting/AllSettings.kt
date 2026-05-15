@@ -24,12 +24,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.movtery.layer_controller.data.POSITION_RANGE
 import com.movtery.layer_controller.utils.snap.SnapMode
+import com.movtery.zalithlauncher.game.download.assets.platform.Platform
 import com.movtery.zalithlauncher.game.path.GamePathManager
 import com.movtery.zalithlauncher.game.version.installed.GraphicsApi
 import com.movtery.zalithlauncher.info.InfoDistributor
 import com.movtery.zalithlauncher.setting.enums.AppLanguage
 import com.movtery.zalithlauncher.setting.enums.DarkMode
 import com.movtery.zalithlauncher.setting.enums.GestureActionType
+import com.movtery.zalithlauncher.setting.enums.HomePageType
 import com.movtery.zalithlauncher.setting.enums.MirrorSourceType
 import com.movtery.zalithlauncher.setting.enums.MouseControlMode
 import com.movtery.zalithlauncher.ui.control.HotbarRule
@@ -386,6 +388,16 @@ object AllSettings : SettingsRegistry() {
     val videoBackgroundVolume = intSetting("videoBackgroundVolume", 0, 0..100)
 
     /**
+     * 启动器主页类型
+     */
+    val homePageType = enumSetting("homePageType", HomePageType.Blank)
+
+    /**
+     * 启动器网络主页下载地址
+     */
+    val homePageURL = stringSetting("homePageURL", "")
+
+    /**
      * 启动器上次检查更新时，用户选择忽略的版本号
      */
     val lastIgnoredVersion = intSetting("lastIgnoredVersion", null)
@@ -577,4 +589,24 @@ object AllSettings : SettingsRegistry() {
      * 是否在打开启动器时，根据特定的运行游戏次数，显示赞助支持弹窗
      */
     val showSponsorship = boolSetting("showSponsorship", true)
+
+    /**
+     * 搜索模组的初始搜索平台
+     */
+    val searchModPlatform = enumSetting("searchModPlatform", Platform.MODRINTH)
+
+    /**
+     * 搜索整合包的初始搜索平台
+     */
+    val searchModpackPlatform = enumSetting("searchModpackPlatform", Platform.MODRINTH)
+
+    /**
+     * 搜索资源包的初始搜索平台
+     */
+    val searchResourcePackPlatform = enumSetting("searchResourcePackPlatform", Platform.MODRINTH)
+
+    /**
+     * 搜索光影的初始搜索平台
+     */
+    val searchShadersPlatform = enumSetting("searchShadersPlatform", Platform.MODRINTH)
 }

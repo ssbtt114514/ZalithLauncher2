@@ -149,8 +149,9 @@ fun TouchpadLayout(
                     }
 
                     awaitPointerEventScope {
-                        while (true) {
-                            val event = awaitPointerEvent()
+                        try {
+                            while (true) {
+                                val event = awaitPointerEvent()
 
                             event.changes
                                 .filter { it.changedToDown() }
@@ -162,13 +163,14 @@ fun TouchpadLayout(
                                     //是否被父级标记为仅处理滑动
                                     val isMoveOnly = isMoveOnlyPointer(pointerId)
 
-                                    if (!isMoveOnly && pointerId !in occupiedPointers) {
-                                        onOccupiedPointer(pointerId)
-                                        occupiedPointers.add(pointerId)
-                                    }
+                                    //如果没有活跃指针，且当前指针未被消费，则开始处理这个指针
+                                    if (activePointer == null && (!change.isConsumed || isMoveOnly)) {
+                                        //fix: 只有真正成为 activePointer 的指针，才标记为已占用
+                                        if (!isMoveOnly && pointerId !in occupiedPointers) {
+                                            onOccupiedPointer(pointerId)
+                                            occupiedPointers.add(pointerId)
+                                        }
 
-                                    //如果没有活跃指针，则开始处理这个指针
-                                    if (activePointer == null) {
                                         activePointer = pointerId
 
                                         dragStates[pointerId] =
@@ -298,9 +300,12 @@ fun TouchpadLayout(
                                 resetTouchState()
                             }
                         }
+                    } finally {
+                        resetTouchState()
                     }
                 }
             }
+        }
             .then(
                 Modifier.mouseEventModifier(
                     disabled = requestPointerCapture,

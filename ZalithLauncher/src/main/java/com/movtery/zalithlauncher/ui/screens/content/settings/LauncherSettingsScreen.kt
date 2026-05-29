@@ -21,6 +21,7 @@ package com.movtery.zalithlauncher.ui.screens.content.settings
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,12 +30,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
@@ -61,6 +64,7 @@ import com.movtery.zalithlauncher.coroutine.TaskSystem
 import com.movtery.zalithlauncher.path.PathManager
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.setting.enums.AppLanguage
+import com.movtery.zalithlauncher.setting.enums.BackgroundBlur
 import com.movtery.zalithlauncher.setting.enums.DarkMode
 import com.movtery.zalithlauncher.setting.enums.HomePageType
 import com.movtery.zalithlauncher.setting.enums.MirrorSourceType
@@ -262,35 +266,35 @@ fun LauncherSettingsScreen(
                             suffix = "Dp",
                             enabled = backgroundViewModel.isValid,
                             fineTuningControl = true,
-//                            appendContent = {
-//                                val unit = AllSettings.backgroundBlurType
-//                                val state = unit.state
-//                                IconButton(
-//                                    modifier = Modifier
-//                                        .padding(start = 12.dp)
-//                                        .size(32.dp),
-//                                    colors = IconButtonDefaults.iconButtonColors(
-//                                        containerColor = MaterialTheme.colorScheme.primary,
-//                                        contentColor = MaterialTheme.colorScheme.onPrimary,
-//                                    ),
-//                                    onClick = {
-//                                        unit.save(state.switch())
-//                                    }
-//                                ) {
-//                                    Crossfade(
-//                                        targetState = state
-//                                    ) { target ->
-//                                        val painter = when (target) {
-//                                            BackgroundBlur.Background -> painterResource(R.drawable.ic_blur_circular_outlined)
-//                                            BackgroundBlur.Foreground -> painterResource(R.drawable.ic_blur_circular_filled)
-//                                        }
-//                                        Icon(
-//                                            painter = painter,
-//                                            contentDescription = null
-//                                        )
-//                                    }
-//                                }
-//                            }
+                            appendContent = {
+                                val unit = AllSettings.backgroundBlurType
+                                val state = unit.state
+                                IconButton(
+                                    modifier = Modifier
+                                        .padding(start = 12.dp)
+                                        .size(32.dp),
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                                    ),
+                                    onClick = {
+                                        unit.save(state.switch())
+                                    }
+                                ) {
+                                    Crossfade(
+                                        targetState = state
+                                    ) { target ->
+                                        val painter = when (target) {
+                                            BackgroundBlur.Background -> painterResource(R.drawable.ic_blur_circular_outlined)
+                                            BackgroundBlur.Foreground -> painterResource(R.drawable.ic_blur_circular_filled)
+                                        }
+                                        Icon(
+                                            painter = painter,
+                                            contentDescription = null
+                                        )
+                                    }
+                                }
+                            }
                         )
                     }
                 }

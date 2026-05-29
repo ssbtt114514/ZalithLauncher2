@@ -73,8 +73,10 @@ import com.movtery.zalithlauncher.game.addons.modloader.forgelike.forge.ForgeVer
 import com.movtery.zalithlauncher.game.addons.modloader.forgelike.neoforge.NeoForgeVersion
 import com.movtery.zalithlauncher.game.addons.modloader.modlike.ModVersion
 import com.movtery.zalithlauncher.game.addons.modloader.optifine.OptiFineVersion
+import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.ui.components.influencedByBackgroundColor
 import com.movtery.zalithlauncher.ui.components.rememberMaxHeight
+import com.movtery.zalithlauncher.ui.screens.content.elements.backgroundGlass
 import com.movtery.zalithlauncher.ui.theme.cardColor
 import com.movtery.zalithlauncher.ui.theme.onCardColor
 import com.movtery.zalithlauncher.utils.animation.getAnimateTween
@@ -174,6 +176,7 @@ fun <E> AddonListLayout(
     influencedByBackground: Boolean = true,
     color: Color = cardColor(influencedByBackground),
     contentColor: Color = onCardColor(),
+    blur: Int = AllSettings.backgroundBlur.state,
 ) {
     var selectedItem by remember { mutableStateOf<E?>(null) }
 
@@ -205,7 +208,9 @@ fun <E> AddonListLayout(
         contentColor = contentColor
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .backgroundGlass(blur, color, influencedByBackground)
         ) {
             AddonListHeader(
                 modifier = Modifier.fillMaxWidth(),
@@ -420,6 +425,7 @@ fun AddonWarningItem(
         enabled = true
     ),
     contentColor: Color = MaterialTheme.colorScheme.onErrorContainer,
+    blur: Int = AllSettings.backgroundBlur.state,
 ) {
     Surface(
         modifier = modifier,
@@ -428,7 +434,9 @@ fun AddonWarningItem(
         contentColor = contentColor
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            modifier = Modifier
+                .backgroundGlass(blur, color)
+                .padding(horizontal = 16.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(

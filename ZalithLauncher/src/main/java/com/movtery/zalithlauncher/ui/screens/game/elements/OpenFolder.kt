@@ -196,7 +196,8 @@ fun OpenFolderLayer(
                         modifier = Modifier.fillMaxSize(),
                     ) {
                         CardTitleLayout(
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            blur = 0
                         ) {
                             Column(
                                 modifier = Modifier

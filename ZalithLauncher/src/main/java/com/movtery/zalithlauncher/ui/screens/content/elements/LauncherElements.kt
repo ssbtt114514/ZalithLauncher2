@@ -51,6 +51,7 @@ import com.movtery.zalithlauncher.game.renderer.RendererInterface
 import com.movtery.zalithlauncher.game.renderer.Renderers
 import com.movtery.zalithlauncher.game.version.installed.Version
 import com.movtery.zalithlauncher.setting.AllSettings
+import com.movtery.zalithlauncher.setting.enums.BackgroundBlur
 import com.movtery.zalithlauncher.ui.components.SimpleAlertDialog
 import com.movtery.zalithlauncher.ui.components.VideoPlayer
 import com.movtery.zalithlauncher.ui.screens.content.FirstLoginMenu
@@ -63,11 +64,13 @@ import com.movtery.zalithlauncher.utils.string.isBiggerTo
 import com.movtery.zalithlauncher.utils.string.isLowerTo
 import com.movtery.zalithlauncher.viewmodel.BackgroundViewModel
 import com.movtery.zalithlauncher.viewmodel.ErrorViewModel
+import com.movtery.zalithlauncher.viewmodel.LocalBackgroundViewModel
 import dev.chrisbanes.haze.HazeInputScale
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.blur.HazeColorEffect
 import dev.chrisbanes.haze.blur.blurEffect
 import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
@@ -314,9 +317,9 @@ fun Background(
     allowVideo: Boolean = true
 ) {
     Box(
-        modifier = modifier.glass(
+        modifier = modifier.backgroundBlur(
             blur = AllSettings.backgroundBlur.state,
-            hazeState = null,
+            hazeState = viewModel.hazeState,
         )
     ) {
         when {
@@ -339,12 +342,40 @@ fun Background(
     }
 }
 
+@Composable
+private fun Modifier.backgroundBlur(
+    blur: Int,
+    hazeState: HazeState,
+): Modifier {
+    return when (AllSettings.backgroundBlurType.state) {
+        BackgroundBlur.Background -> this.glass(blur, null, null)
+        BackgroundBlur.Foreground -> this.hazeSource(hazeState)
+    }
+}
+
+/**
+ * 背景模糊效果
+ * @param enabled 是否应用模糊效果
+ */
+@Composable
+fun Modifier.backgroundGlass(
+    blur: Int,
+    color: Color,
+    enabled: Boolean = true,
+): Modifier {
+    if (AllSettings.backgroundBlurType.state == BackgroundBlur.Background) return this
+    if (!enabled) return this
+    val state = LocalBackgroundViewModel.current?.hazeState ?: return this
+    return this.glass(blur, color, state)
+}
+
 /**
  * 背景模糊效果
  */
 @Composable
 private fun Modifier.glass(
     blur: Int,
+    color: Color?,
     hazeState: HazeState?,
 ): Modifier {
     if (blur <= 0 || AllSettings.launcherBackgroundOpacity.state >= 100) return this
@@ -368,15 +399,18 @@ private fun Modifier.glass(
             fraction = sqrt(t)
         )
     }
-    val colorEffects = remember(t) {
+    val colorEffects = remember(t, color) {
         val whiteAlpha = lerp(
             start = 0f,
             stop = 0.25f,
             fraction = sqrt(t)
         )
-        listOf(
-            HazeColorEffect.tint(Color.White.copy(alpha = whiteAlpha), BlendMode.SrcOver),
-        )
+        buildList {
+            if (color != null) {
+                add(HazeColorEffect.tint(color, BlendMode.SrcOver))
+            }
+            add(HazeColorEffect.tint(Color.White.copy(alpha = whiteAlpha), BlendMode.Softlight))
+        }
     }
 
     return this

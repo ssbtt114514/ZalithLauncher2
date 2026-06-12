@@ -308,7 +308,6 @@ private class ServerListViewModel(
     /**
      * 保存服务器列表
      * @param reason 保存服务器列表的理由，方便日志定位
-     * @param gamePath 指定 servers.dat 文件的保存目录
      * @param beforeSave 在保存前可以进行的操作
      * @param beforeSave 在保存后可以进行的操作
      */

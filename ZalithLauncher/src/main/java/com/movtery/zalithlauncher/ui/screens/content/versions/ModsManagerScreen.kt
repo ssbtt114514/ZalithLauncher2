@@ -169,6 +169,7 @@ import java.io.File
 import java.util.LinkedList
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
+import kotlin.time.Duration.Companion.milliseconds
 
 private class ModsManageViewModel(
     modsDir: File
@@ -356,7 +357,7 @@ private class ModsManageViewModel(
                 val task = queueMutex.withLock {
                     loadQueue.poll()
                 } ?: run {
-                    delay(100)
+                    delay(100.milliseconds)
                     continue
                 }
 

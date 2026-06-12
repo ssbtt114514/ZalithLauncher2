@@ -128,12 +128,14 @@ private data class AccountActions(
 
 /**
  * 进入账号管理器时，可附加的打开登录菜单选项
- * @property NONE 不打开菜单
- * @property MICROSOFT 打开微软登录菜单
- * @property NORMAL 打开总登录菜单
  */
 enum class FirstLoginMenu {
-    NONE, MICROSOFT, NORMAL
+    /** 不打开菜单 */
+    NONE,
+    /** 打开微软登录菜单 */
+    MICROSOFT,
+    /** 打开总登录菜单 */
+    NORMAL
 }
 
 /**

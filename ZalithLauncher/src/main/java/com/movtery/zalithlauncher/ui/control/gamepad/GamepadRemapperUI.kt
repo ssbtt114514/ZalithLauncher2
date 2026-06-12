@@ -71,6 +71,7 @@ import com.movtery.zalithlauncher.ui.theme.onCardColor
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.viewmodel.GamepadRemapperViewModel
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val TAG = "GamepadRemapper"
 
@@ -195,7 +196,7 @@ fun GamepadRemapperDialog(
             //进度变更之后，需要固定等待一段时间重新开始监听事件
             LaunchedEffect(progress) {
                 isListening = false
-                delay(700L)
+                delay(700L.milliseconds)
                 isListening = true
             }
 

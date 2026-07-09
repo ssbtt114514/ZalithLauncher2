@@ -73,7 +73,9 @@ import com.movtery.zalithlauncher.game.download.assets.utils.ModTranslations
 import com.movtery.zalithlauncher.game.download.assets.utils.getMcmodTitle
 import com.movtery.zalithlauncher.game.download.assets.utils.getTranslations
 import com.movtery.zalithlauncher.game.versioninfo.filterRelease
+import com.movtery.zalithlauncher.ui.AndroidStringText
 import com.movtery.zalithlauncher.ui.base.BaseScreen
+import com.movtery.zalithlauncher.ui.buildAppendedText
 import com.movtery.zalithlauncher.ui.components.BackgroundCard
 import com.movtery.zalithlauncher.ui.components.CheckChip
 import com.movtery.zalithlauncher.ui.components.ScalingLabel
@@ -486,15 +488,16 @@ private fun Versions(
         }
         is DownloadAssetsState.Error -> {
             Box(modifier.padding(all = 12.dp)) {
-                val message = if (versions.args != null) {
-                    stringResource(versions.message, *versions.args)
-                } else {
-                    stringResource(versions.message)
-                }
-
                 ScalingLabel(
                     modifier = Modifier.align(Alignment.Center),
-                    text = stringResource(R.string.download_assets_failed_to_get_versions, message),
+                    text = {
+                        AndroidStringText(
+                            text = buildAppendedText {
+                                append(R.string.download_assets_failed_to_get_versions)
+                                append(versions.message)
+                            }
+                        )
+                    },
                     onClick = onReload
                 )
             }
@@ -650,15 +653,16 @@ private fun ProjectInfo(
                         .fillMaxSize()
                         .padding(all = 12.dp)
                 ) {
-                    val message = if (result.args != null) {
-                        stringResource(result.message, *result.args)
-                    } else {
-                        stringResource(result.message)
-                    }
-
                     ScalingLabel(
                         modifier = Modifier.align(Alignment.Center),
-                        text = stringResource(R.string.download_assets_failed_to_get_project, message),
+                        text = {
+                            AndroidStringText(
+                                text = buildAppendedText {
+                                    append(R.string.download_assets_failed_to_get_project)
+                                    append(result.message)
+                                }
+                            )
+                        },
                         onClick = onReload
                     )
                 }

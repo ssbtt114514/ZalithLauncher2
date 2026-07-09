@@ -76,9 +76,7 @@ class ModrinthPackExporter: AbstractExporter(
                     selectedFiles = info.selectedFiles,
                     onProgress = { file ->
                         if (file != null) {
-                            task.updateMessage(androidText(
-                                R.string.empty_holder, file.nameWithoutExtension
-                            ))
+                            task.updateMessage(androidText(file.nameWithoutExtension))
                         } else {
                             task.updateMessage(null)
                         }

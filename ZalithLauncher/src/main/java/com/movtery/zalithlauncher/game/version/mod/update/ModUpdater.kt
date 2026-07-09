@@ -158,9 +158,7 @@ class ModUpdater(
                         val file = mod.localMod.file
 
                         task.updateProgress((index + 1f) / totalSize)
-                        task.updateMessage(androidText(
-                            R.string.empty_holder, file.nameWithoutExtension
-                        ))
+                        task.updateMessage(androidText(file.nameWithoutExtension))
 
                         // 过滤不可检查远端的模组
                         if (!mod.localMod.checkRemote) return@forEachIndexed
@@ -218,9 +216,7 @@ class ModUpdater(
                                 // 线程安全地更新进度条：以完成的数量来计算进度
                                 val currentCompleted = completedCount.incrementAndGet()
                                 task.updateProgress(currentCompleted.toFloat() / totalSize)
-                                task.updateMessage(androidText(
-                                    R.string.empty_holder, data.project.title
-                                ))
+                                task.updateMessage(androidText(data.project.title))
 
                                 // 如果有新版本，返回键值对；否则返回 null
                                 if (version != null) data to version else null
@@ -282,9 +278,7 @@ class ModUpdater(
                         val cacheFile = File(tempModUpdaterDir, newFileName)
 
                         task.updateProgress((index + 1).toFloat() / totalCount)
-                        task.updateMessage(androidText(
-                            R.string.empty_holder, oldFile.name
-                        ))
+                        task.updateMessage(androidText(oldFile.name))
 
                         //确保所有文件都有效
                         if (modsDir.exists() && oldFile.exists() && cacheFile.exists()) {

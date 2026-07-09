@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui
 
+import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.LocalTextStyle
@@ -27,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -82,6 +84,15 @@ sealed interface AndroidStringText {
             return result
         }
     }
+
+    /**
+     * 拼接多个 [AndroidStringText] 实例
+     *
+     * @property texts 要拼接的字符串列表
+     */
+    data class Appended(
+        val texts: List<AndroidStringText>
+    ) : AndroidStringText
 }
 
 /**
@@ -117,6 +128,61 @@ fun androidText(
     vararg args: Any
 ) = AndroidStringText.StringRes(key, args)
 
+/**
+ * 创建 [AndroidStringText.Appended] 实例
+ */
+fun androidText(vararg texts: AndroidStringText) = AndroidStringText.Appended(texts.toList())
+
+
+/**
+ * 使用 DSL 构建 [AndroidStringText.Appended] 实例
+ */
+inline fun buildAppendedText(
+    block: AndroidStringTextBuilder.() -> Unit
+): AndroidStringText = AndroidStringTextBuilder().apply(block).build()
+
+@DslMarker
+private annotation class AndroidStringTextDsl
+@AndroidStringTextDsl
+class AndroidStringTextBuilder {
+    private val texts = mutableListOf<AndroidStringText>()
+    /**
+     * 追加普通字符串
+     */
+    fun append(text: String) {
+        texts.add(AndroidStringText.Text(text))
+    }
+    /**
+     * 追加带有样式的富文本
+     */
+    fun append(text: AnnotatedString) {
+        texts.add(AndroidStringText.Annotated(text))
+    }
+    /**
+     * 通过 Android 资源 ID 加载字符串
+     */
+    fun append(@StringRes resId: Int) {
+        texts.add(AndroidStringText.StringRes(resId, null))
+    }
+    /**
+     * 通过 Android 资源 ID 加载字符串，支持格式化参数
+     */
+    fun append(@StringRes resId: Int, vararg args: Any) {
+        texts.add(AndroidStringText.StringRes(resId, args))
+    }
+    /**
+     * 追加另一个字符串代理对象
+     */
+    fun append(other: AndroidStringText) {
+        texts.add(other)
+    }
+    /**
+     * 构建 [AndroidStringText.Appended] 实例
+     */
+    fun build(): AndroidStringText = AndroidStringText.Appended(texts.toList())
+}
+
+
 
 /**
  * 用于展示 [AndroidStringText] 的 Composable 组件
@@ -143,71 +209,66 @@ fun AndroidStringText(
     minLines: Int = 1,
     style: TextStyle = LocalTextStyle.current,
 ) {
-    when (text) {
-        is AndroidStringText.Text -> {
-            Text(
-                text = text.value,
-                modifier = modifier,
-                autoSize = autoSize,
-                fontSize = fontSize,
-                fontStyle = fontStyle,
-                fontWeight = fontWeight,
-                fontFamily = fontFamily,
-                letterSpacing = letterSpacing,
-                textDecoration = textDecoration,
-                textAlign = textAlign,
-                lineHeight = lineHeight,
-                overflow = overflow,
-                softWrap = softWrap,
-                maxLines = maxLines,
-                minLines = minLines,
-                style = style,
-            )
-        }
-        is AndroidStringText.Annotated -> {
-            Text(
-                text = text.value,
-                modifier = modifier,
-                autoSize = autoSize,
-                fontSize = fontSize,
-                fontStyle = fontStyle,
-                fontWeight = fontWeight,
-                fontFamily = fontFamily,
-                letterSpacing = letterSpacing,
-                textDecoration = textDecoration,
-                textAlign = textAlign,
-                lineHeight = lineHeight,
-                overflow = overflow,
-                softWrap = softWrap,
-                maxLines = maxLines,
-                minLines = minLines,
-                style = style,
-            )
-        }
+    Text(
+        text = resolveAndroidString(text),
+        modifier = modifier,
+        autoSize = autoSize,
+        fontSize = fontSize,
+        fontStyle = fontStyle,
+        fontWeight = fontWeight,
+        fontFamily = fontFamily,
+        letterSpacing = letterSpacing,
+        textDecoration = textDecoration,
+        textAlign = textAlign,
+        lineHeight = lineHeight,
+        overflow = overflow,
+        softWrap = softWrap,
+        maxLines = maxLines,
+        minLines = minLines,
+        style = style,
+    )
+}
+
+/**
+ * 将 [AndroidStringText] 解析为 [AnnotatedString]
+ */
+@Composable
+fun resolveAndroidString(text: AndroidStringText): AnnotatedString {
+    return when (text) {
+        is AndroidStringText.Text -> AnnotatedString(text.value)
+        is AndroidStringText.Annotated -> text.value
         is AndroidStringText.StringRes -> {
             val args = text.args
-            Text(
-                text = if (args == null) {
+            AnnotatedString(
+                if (args == null) {
                     stringResource(text.key)
                 } else {
                     stringResource(text.key, *args)
-                },
-                modifier = modifier,
-                autoSize = autoSize,
-                fontSize = fontSize,
-                fontStyle = fontStyle,
-                fontWeight = fontWeight,
-                fontFamily = fontFamily,
-                letterSpacing = letterSpacing,
-                textDecoration = textDecoration,
-                textAlign = textAlign,
-                lineHeight = lineHeight,
-                overflow = overflow,
-                softWrap = softWrap,
-                maxLines = maxLines,
-                minLines = minLines,
-                style = style,
+                }
             )
         }
+        is AndroidStringText.Appended -> {
+            buildAnnotatedString {
+                text.texts.forEach {
+                    append(resolveAndroidString(it))
+                }
+            }
+        }
     }
+}
+
+/**
+ * 在非 Composable 环境中将 [AndroidStringText] 解析为 [String]
+ *
+ * @param context Android [Context]，用于加载 [AndroidStringText.StringRes] 类型的字符串资源
+ */
+fun AndroidStringText.toAndroidString(context: Context): String = when (this) {
+    is AndroidStringText.Text -> value
+    is AndroidStringText.Annotated -> value.toString()
+    is AndroidStringText.StringRes -> if (args == null) {
+        context.getString(key)
+    } else {
+        context.getString(key, *args)
+    }
+    is AndroidStringText.Appended -> texts.joinToString("") { it.toAndroidString(context) }
 }

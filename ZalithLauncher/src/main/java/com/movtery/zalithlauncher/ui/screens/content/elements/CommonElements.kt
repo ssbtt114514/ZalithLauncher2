@@ -231,7 +231,7 @@ fun rememberMultipleUriImportTaskBuilder(
                             try {
                                 val fileName = context.getFileName(uri) ?: throw IOException("Failed to get file name")
                                 task.updateProgress(-1f)
-                                task.updateMessage(androidText(R.string.empty_holder, fileName))
+                                task.updateMessage(androidText(fileName))
                                 val outputFile = File(targetDir, fileName)
                                 if (checkExtension != null) {
                                     outputFile.checkExtensionOrThrow(checkExtension)
@@ -249,8 +249,8 @@ fun rememberMultipleUriImportTaskBuilder(
 
                                 cSubmitError(
                                     ErrorViewModel.ThrowableMessage(
-                                        title = cErrorTitle,
-                                        message = messageString
+                                        title = androidText(cErrorTitle),
+                                        message = androidText(messageString)
                                     )
                                 )
                             }

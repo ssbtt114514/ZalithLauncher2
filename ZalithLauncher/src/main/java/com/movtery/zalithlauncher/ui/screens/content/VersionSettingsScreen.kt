@@ -105,6 +105,7 @@ import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.viewmodel.ErrorViewModel
 import com.movtery.zalithlauncher.viewmodel.EventViewModel
 import com.movtery.zalithlauncher.viewmodel.ScreenBackStackViewModel
+import com.movtery.zalithlauncher.viewmodel.sendToast
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -417,6 +418,9 @@ private fun NavigationUI(
                                 EventViewModel.Event.VulkanCheck
                             )
                         },
+                        showToast = { text ->
+                            eventViewModel.sendToast(text)
+                        },
                         submitError = submitError
                     )
                 }
@@ -516,6 +520,7 @@ private fun NavigationUI(
                         versionsScreenKey = versionsScreenKey,
                         version = version,
                         backToMainScreen = backToMainScreen,
+                        eventViewModel = eventViewModel,
                         submitError = submitError
                     )
                 }
@@ -645,8 +650,7 @@ private fun UpdateLoaderOperation(
                 is JvmCrashException -> stringResource(R.string.download_install_error_jvm_crash, th.code)
                 is DownloadFailedException -> stringResource(R.string.download_install_error_download_failed)
                 else -> {
-                    val errorMessage = th.localizedMessage ?: th.message ?: th::class.qualifiedName ?: "Unknown error"
-                    stringResource(R.string.empty_holder, errorMessage)
+                    th.localizedMessage ?: th.message ?: th::class.qualifiedName ?: "Unknown error"
                 }
             }
             val dismiss = {

@@ -38,6 +38,7 @@ import com.movtery.zalithlauncher.game.version.installed.Version
 import com.movtery.zalithlauncher.game.version.installed.VersionFolders
 import com.movtery.zalithlauncher.game.version.mod.AllModReader
 import com.movtery.zalithlauncher.setting.AllSettings
+import com.movtery.zalithlauncher.ui.AndroidStringText
 import com.movtery.zalithlauncher.ui.activities.runGame
 import com.movtery.zalithlauncher.ui.androidText
 import com.movtery.zalithlauncher.utils.GSON
@@ -134,8 +135,8 @@ object LaunchGame {
             onError = { message ->
                 submitError(
                     ErrorViewModel.ThrowableMessage(
-                        title = context.getString(R.string.minecraft_download_failed),
-                        message = message
+                        title = androidText(R.string.minecraft_download_failed),
+                        message = androidText(message)
                     )
                 )
             }
@@ -212,25 +213,26 @@ object LaunchGame {
                     AccountsManager.suspendSaveAccount(acc)
                 },
                 onFailed = { error ->
-                    val message: String = when (error) {
-                        is NotPurchasedMinecraftException -> toLocal(context)
-                        is MinecraftProfileException -> error.toLocal(context)
-                        is XboxLoginException -> error.toLocal(context)
-                        is ResponseException -> error.responseMessage
-                        is HttpRequestTimeoutException -> context.getString(R.string.error_timeout)
-                        is UnknownHostException, is UnresolvedAddressException -> context.getString(R.string.error_network_unreachable)
-                        is ConnectException -> context.getString(R.string.error_connection_failed)
-                        is io.ktor.client.plugins.ResponseException -> error.toLocal(context)
+                    val message: AndroidStringText = when (error) {
+                        is NotPurchasedMinecraftException -> toLocal()
+                        is MinecraftProfileException -> error.toLocal()
+                        is XboxLoginException -> error.toLocal()
+                        is ResponseException -> androidText(error.responseMessage)
+                        is HttpRequestTimeoutException -> androidText(R.string.error_timeout)
+                        is UnknownHostException, is UnresolvedAddressException -> androidText(R.string.error_network_unreachable)
+                        is ConnectException -> androidText(R.string.error_connection_failed)
+                        is io.ktor.client.plugins.ResponseException -> error.toLocal()
                         else -> {
                             Logger.error(TAG, "An unknown exception was caught!", error)
-                            val errorMessage = error.localizedMessage ?: error.message ?: error::class.qualifiedName ?: "Unknown error"
-                            context.getString(R.string.empty_holder, errorMessage)
+                            androidText(
+                                error.localizedMessage ?: error.message ?: error::class.qualifiedName ?: "Unknown error"
+                            )
                         }
                     }
 
                     submitError(
                         ErrorViewModel.ThrowableMessage(
-                            title = context.getString(R.string.account_logging_in_failed),
+                            title = androidText(R.string.account_logging_in_failed),
                             message = message
                         )
                     )

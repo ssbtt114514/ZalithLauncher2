@@ -51,7 +51,6 @@ import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.ConnectException
 import java.net.HttpURLConnection
@@ -106,6 +105,7 @@ fun microsoftLogin(
     backToMain: () -> Unit,
     checkIfInWebScreen: () -> Boolean,
     updateOperation: (MicrosoftLoginOperation) -> Unit,
+    showToast: (AndroidStringText, duration: Int) -> Unit,
     submitError: (ErrorViewModel.ThrowableMessage) -> Unit
 ) {
     val task = Task.runTask(
@@ -116,26 +116,22 @@ fun microsoftLogin(
             task.updateMessage(androidText(R.string.account_microsoft_fetch_device_code))
             val deviceCode = fetchDeviceCodeResponse(coroutineContext)
             copyText(COPY_LABEL_DEVICE_CODE, deviceCode.userCode, context, false)
-            withContext(Dispatchers.Main) {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.account_microsoft_coped_device_code, deviceCode.userCode),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+            showToast(
+                androidText(R.string.account_microsoft_coped_device_code, deviceCode.userCode),
+                Toast.LENGTH_SHORT
+            )
             toWeb(deviceCode.verificationUrl)
             task.updateProgress(-1f)
             task.updateMessage(androidText(R.string.account_microsoft_get_token, deviceCode.userCode))
             val tokenResponse = getTokenResponse(deviceCode, coroutineContext) { time ->
                 (!checkIfInWebScreen()).also { exit ->
-                    if (exit && time > 0) withContext(Dispatchers.Main) {
+                    if (exit && time > 0) {
                         //如果已退出网页，则视为用户想要退出登录
                         //弹出提示
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.account_microsoft_exit_by_user),
+                        showToast(
+                            androidText(R.string.account_microsoft_exit_by_user),
                             Toast.LENGTH_LONG
-                        ).show()
+                        )
                     }
                 }
             }
@@ -154,22 +150,23 @@ fun microsoftLogin(
         },
         onError = { th ->
             when (th) {
-                is HttpRequestTimeoutException -> context.getString(R.string.account_logging_time_out)
-                is NotPurchasedMinecraftException -> toLocal(context)
-                is MinecraftProfileException -> th.toLocal(context)
-                is XboxLoginException -> th.toLocal(context)
-                is UnknownHostException, is UnresolvedAddressException -> context.getString(R.string.error_network_unreachable)
-                is ConnectException -> context.getString(R.string.error_connection_failed)
-                is ResponseException -> th.toLocal(context)
+                is HttpRequestTimeoutException -> androidText(R.string.account_logging_time_out)
+                is NotPurchasedMinecraftException -> toLocal()
+                is MinecraftProfileException -> th.toLocal()
+                is XboxLoginException -> th.toLocal()
+                is UnknownHostException, is UnresolvedAddressException -> androidText(R.string.error_network_unreachable)
+                is ConnectException -> androidText(R.string.error_connection_failed)
+                is ResponseException -> th.toLocal()
                 is CancellationException -> { null }
                 else -> {
-                    val errorMessage = th.localizedMessage ?: th.message ?: th::class.qualifiedName ?: "Unknown error"
-                    context.getString(R.string.empty_holder, errorMessage)
+                    androidText(
+                        th.localizedMessage ?: th.message ?: th::class.qualifiedName ?: "Unknown error"
+                    )
                 }
             }?.let { message ->
                 submitError(
                     ErrorViewModel.ThrowableMessage(
-                        title = context.getString(R.string.account_logging_in_failed),
+                        title = androidText(R.string.account_logging_in_failed),
                         message = message
                     )
                 )

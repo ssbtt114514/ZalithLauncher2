@@ -955,8 +955,8 @@ private fun CustomBackground(
                         backgroundViewModel.delete()
                         submitError(
                             ErrorViewModel.ThrowableMessage(
-                                title = importErrorText,
-                                message = th.getMessageOrToString()
+                                title = androidText(importErrorText),
+                                message = androidText(th.getMessageOrToString())
                             )
                         )
                     }

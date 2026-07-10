@@ -44,7 +44,10 @@ import com.movtery.zalithlauncher.context.COPY_LABEL_LINK
 import com.movtery.zalithlauncher.coroutine.Task
 import com.movtery.zalithlauncher.coroutine.TaskSystem
 import com.movtery.zalithlauncher.game.control.ControlManager
+import com.movtery.zalithlauncher.game.plugin.PluginLoader
 import com.movtery.zalithlauncher.game.plugin.driver.DriverPluginManager
+import com.movtery.zalithlauncher.game.plugin.renderer_v2.RendererV2PluginManager
+import com.movtery.zalithlauncher.game.renderer.Renderers
 import com.movtery.zalithlauncher.game.version.installed.VersionsManager
 import com.movtery.zalithlauncher.notification.NotificationManager
 import com.movtery.zalithlauncher.path.PathManager
@@ -167,12 +170,17 @@ class MainActivity : BaseAppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //处理外部导入
+        val isImporting = handleImportIfNeeded(intent)
+
+        //加载渲染器
+        Renderers.init()
+        //加载插件
+        PluginLoader.loadAllPlugins(this, false)
+        refreshData()
 
         //初始化通知管理（创建渠道）
         NotificationManager.initManager(this)
-
-        //处理外部导入
-        val isImporting = handleImportIfNeeded(intent)
 
         //检查更新
         if (!isImporting && launcherUpgradeViewModel.operation == LauncherUpgradeOperation.None) {
@@ -715,6 +723,7 @@ class MainActivity : BaseAppCompatActivity() {
         val importing = when (type) {
             IMPORT_TYPE_MODPACK -> handleModpackImport(intent)
             IMPORT_TYPE_CONTROLS -> handleControlsImport(intent)
+            IMPORT_TYPE_RENDERER -> handleRendererImport(intent)
             else -> false
         }
 
@@ -765,6 +774,22 @@ class MainActivity : BaseAppCompatActivity() {
             importControlFiles(listOf(uri))
         }
         return uri != null
+    }
+
+    /**
+     * 处理新架构渲染器插件配置导入
+     * @return 是否已经触发了渲染器导入
+     */
+    private fun handleRendererImport(intent: Intent): Boolean {
+        val senderPackage = intent.getStringExtra(EXTRA_SENDER_PACKAGE) ?: return false
+        val configJson = intent.getStringExtra(EXTRA_CONFIG_JSON) ?: return false
+
+        RendererV2PluginManager.deserialize(
+            context = this,
+            senderPackageName = senderPackage,
+            configJson = configJson
+        )
+        return true
     }
 
     override fun onResume() {

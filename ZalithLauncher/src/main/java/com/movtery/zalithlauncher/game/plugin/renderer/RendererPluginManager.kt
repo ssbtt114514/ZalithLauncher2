@@ -61,7 +61,7 @@ object RendererPluginManager: ApkPluginManager() {
             val currentRenderer = runCatching {
                 Renderers.getCurrentRenderer().getUniqueIdentifier()
             }.getOrNull()
-            return rendererPluginList.find { it.uniqueIdentifier == currentRenderer }
+            return rendererPluginList.find { it.packageName == currentRenderer }
         }
 
     /**
@@ -76,7 +76,7 @@ object RendererPluginManager: ApkPluginManager() {
      */
     @JvmStatic
     fun isConfigurablePlugin(rendererUniqueIdentifier: String): Boolean {
-        val renderer = rendererPluginList.find { it.uniqueIdentifier == rendererUniqueIdentifier }
+        val renderer = rendererPluginList.find { it.packageName == rendererUniqueIdentifier }
         return renderer?.isConfigurable == true
     }
 
@@ -126,12 +126,12 @@ object RendererPluginManager: ApkPluginManager() {
                 val appName = info.loadLabel(packageManager).toString()
 
                 val plugin = RendererPlugin(
+                    packageName = packageName,
                     id = rendererId,
                     displayName = des,
                     summary = context.getString(R.string.settings_renderer_from_plugins, appName),
                     minMCVer = metaData.getVersionString("minMCVer"),
                     maxMCVer = metaData.getVersionString("maxMCVer"),
-                    uniqueIdentifier = packageName,
                     glName = renderer[1],
                     eglName = renderer[2].progressEglName(nativeLibraryDir),
                     path = nativeLibraryDir,

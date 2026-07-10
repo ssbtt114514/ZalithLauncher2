@@ -57,7 +57,7 @@ object PluginLoader {
 
         val queryIntentActivities =
             context.packageManager.queryIntentActivities(
-                Intent("android.intent.action.MAIN"),
+                Intent(Intent.ACTION_MAIN),
                 PACKAGE_FLAGS
             )
         queryIntentActivities.forEach { resolve ->

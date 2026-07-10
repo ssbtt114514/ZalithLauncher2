@@ -18,7 +18,7 @@
 
 package com.movtery.zalithlauncher.game.plugin.renderer
 
-abstract class RendererPlugin(
+data class RendererPlugin(
     val id: String,
     val displayName: String,
     val summary: String? = null,
@@ -29,5 +29,6 @@ abstract class RendererPlugin(
     val eglName: String,
     val path: String,
     val env: Map<String, String>,
-    val dlopen: List<String>
+    val dlopen: List<String>,
+    val isConfigurable: Boolean = false,
 )

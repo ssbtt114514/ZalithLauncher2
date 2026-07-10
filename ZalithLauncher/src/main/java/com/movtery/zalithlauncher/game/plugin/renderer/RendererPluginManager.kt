@@ -32,7 +32,6 @@ import com.movtery.zalithlauncher.game.renderer.Renderers
  */
 object RendererPluginManager: ApkPluginManager() {
     private val rendererPluginList: MutableList<RendererPlugin> = mutableListOf()
-    private val apkRendererPluginList: MutableList<ApkRendererPlugin> = mutableListOf()
 
     /**
      * 获取当前渲染器插件加载的所有渲染器
@@ -70,7 +69,6 @@ object RendererPluginManager: ApkPluginManager() {
      */
     fun clearPlugin() {
         rendererPluginList.clear()
-        apkRendererPluginList.clear()
     }
 
     /**
@@ -78,12 +76,8 @@ object RendererPluginManager: ApkPluginManager() {
      */
     @JvmStatic
     fun isConfigurablePlugin(rendererUniqueIdentifier: String): Boolean {
-        val renderer = apkRendererPluginList.find { it.uniqueIdentifier == rendererUniqueIdentifier }
-        return renderer?.packageName in setOf(
-            "com.bzlzhh.plugin.ngg",
-            "com.bzlzhh.plugin.ngg.angleless",
-            "com.fcl.plugin.mobileglues"
-        )
+        val renderer = rendererPluginList.find { it.uniqueIdentifier == rendererUniqueIdentifier }
+        return renderer?.isConfigurable == true
     }
 
     /**
@@ -131,7 +125,7 @@ object RendererPluginManager: ApkPluginManager() {
                 val packageName = info.packageName
                 val appName = info.loadLabel(packageManager).toString()
 
-                val plugin = ApkRendererPlugin(
+                val plugin = RendererPlugin(
                     id = rendererId,
                     displayName = des,
                     summary = context.getString(R.string.settings_renderer_from_plugins, appName),
@@ -143,11 +137,14 @@ object RendererPluginManager: ApkPluginManager() {
                     path = nativeLibraryDir,
                     env = envList,
                     dlopen = dlopenList,
-                    packageName = packageName
+                    isConfigurable = packageName in setOf(
+                        "com.bzlzhh.plugin.ngg",
+                        "com.bzlzhh.plugin.ngg.angleless",
+                        "com.fcl.plugin.mobileglues"
+                    )
                 )
 
                 rendererPluginList.add(plugin)
-                apkRendererPluginList.add(plugin)
 
                 runCatching {
                     cacheAppIcon(context, info)

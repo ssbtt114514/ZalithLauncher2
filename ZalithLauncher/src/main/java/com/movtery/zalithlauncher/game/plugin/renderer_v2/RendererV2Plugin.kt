@@ -18,6 +18,8 @@
 
 package com.movtery.zalithlauncher.game.plugin.renderer_v2
 
+import com.movtery.zalithlauncher.game.plugin.renderer_v2.data.RendererConfigList
+
 /**
  * V2 渲染器插件预处理数据
  * @param packageName 插件包名

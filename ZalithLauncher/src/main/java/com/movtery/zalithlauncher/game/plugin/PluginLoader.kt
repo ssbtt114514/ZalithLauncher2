@@ -57,6 +57,8 @@ object PluginLoader {
         RendererV2PluginManager.clearPlugin()
         NativePluginManager.clearPlugin()
 
+        RendererV2PluginManager.initialize(context)
+
         val queryIntentActivities =
             context.packageManager.queryIntentActivities(
                 Intent(Intent.ACTION_MAIN),

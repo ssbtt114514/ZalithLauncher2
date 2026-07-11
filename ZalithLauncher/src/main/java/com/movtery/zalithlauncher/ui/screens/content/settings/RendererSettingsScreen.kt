@@ -138,7 +138,7 @@ fun RendererSettingsScreen(
                         Renderers.getCompatibleRenderers(context).second
                             .filterIsInstance<RendererV2Data>()
                             .find { it.getUniqueIdentifier() == currentRendererId }
-                            ?.env?.getEditableUnits()
+                            ?.env?.getEditableUnits()?.takeIf { it.isNotEmpty() }
                     }
                     if (v2PluginEnvs != null) {
                         for (unit in v2PluginEnvs) {

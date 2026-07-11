@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.plugin.driver.Driver
 import com.movtery.zalithlauncher.game.plugin.driver.DriverPluginManager
+import com.movtery.zalithlauncher.game.plugin.renderer_v2.RendererV2Data
 import com.movtery.zalithlauncher.game.renderer.RendererInterface
 import com.movtery.zalithlauncher.game.renderer.Renderers
 import com.movtery.zalithlauncher.game.version.installed.GraphicsApi
@@ -131,6 +132,33 @@ fun RendererSettingsScreen(
                             }
                         }
                     )
+
+                    val currentRendererId = AllSettings.renderer.state
+                    val v2PluginEnvs = remember(currentRendererId) {
+                        Renderers.getCompatibleRenderers(context).second
+                            .filterIsInstance<RendererV2Data>()
+                            .find { it.getUniqueIdentifier() == currentRendererId }
+                            ?.env?.getEditableUnits()
+                    }
+                    if (v2PluginEnvs != null) {
+                        for (unit in v2PluginEnvs) {
+                            val items = unit.values
+                            if (items.isNotEmpty()) {
+                                ListSettingsCard(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    position = CardPosition.Middle,
+                                    items = items,
+                                    currentId = unit.state,
+                                    defaultId = unit.defaultValue,
+                                    title = stringResource(R.string.settings_renderer_env_title, unit.rawEnv.key),
+                                    summary = unit.summary,
+                                    getItemText = { it },
+                                    getItemId = { it },
+                                    onValueChange = { unit.save(it) }
+                                )
+                            }
+                        }
+                    }
 
                     ListSettingsCard(
                         modifier = Modifier.fillMaxWidth(),

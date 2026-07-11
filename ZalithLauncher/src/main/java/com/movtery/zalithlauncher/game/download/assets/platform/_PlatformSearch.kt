@@ -53,7 +53,6 @@ private val mirrorModrinthSearcher = ModrinthSearcher(
 private val curseForgeSearcher = CurseForgeSearcher()
 private val mirrorCurseForgeSearcher = CurseForgeSearcher(
     api = MCIM_CURSEFORGE_API,
-    apiKey = null, //不向镜像源提供 api key
     source = "MCIM CurseForge"
 )
 
@@ -194,8 +193,7 @@ suspend fun searchAssets(
     }.onFailure { e ->
         if (e !is CancellationException) {
             Logger.error(TAG, "An exception occurred while searching for assets.", e)
-            val pair = mapExceptionToMessage(e)
-            val state = SearchAssetsState.Error(pair.first, pair.second)
+            val state = SearchAssetsState.Error(mapExceptionToMessage(e))
             onError(state)
         } else {
             Logger.debug(TAG, "The search task has been cancelled.")
@@ -239,8 +237,7 @@ suspend fun <E> getVersions(
     }.onFailure { e ->
         if (e !is CancellationException) {
             Logger.error(TAG, "An exception occurred while retrieving the project version.", e)
-            val pair = mapExceptionToMessage(e)
-            val state = DownloadAssetsState.Error<List<E>>(pair.first, pair.second)
+            val state = DownloadAssetsState.Error<List<E>>(mapExceptionToMessage(e))
             onError(state)
         } else {
             Logger.debug(TAG, "The version retrieval task has been cancelled.")
@@ -272,8 +269,7 @@ suspend fun <E> getProject(
         onFailure = { e ->
             if (e !is CancellationException) {
                 Logger.error(TAG, "An exception occurred while retrieving project information.", e)
-                val pair = mapExceptionToMessage(e)
-                val state = DownloadAssetsState.Error<E>(pair.first, pair.second)
+                val state = DownloadAssetsState.Error<E>(mapExceptionToMessage(e))
                 onError(state, e)
             } else {
                 Logger.debug(TAG, "The project retrieval task has been cancelled.")

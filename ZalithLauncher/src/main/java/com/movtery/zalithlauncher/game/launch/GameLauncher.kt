@@ -99,7 +99,7 @@ class GameLauncher(
 
     override suspend fun launch(screenSize: IntSize): Int {
         if (!Renderers.isCurrentRendererValid()) {
-            Renderers.setCurrentRenderer(activity, version.getRenderer())
+            Renderers.setCurrentRenderer(version.getRenderer())
         }
 
         val manifest = GSON.fromJson(File(version.getVersionPath(), "${version.getVersionName()}.json").readText(), GameManifest::class.java)

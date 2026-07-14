@@ -52,7 +52,7 @@ abstract class FullScreenAppCompatActivity : AbstractAppCompatActivity() {
      *
      * 注：targetSdk 需要设置为 34，从 35 开始，Activity 会被强行加入 enableEdgeToEdge，该实现就会彻底失效
      */
-    fun applyFullscreen() {
+    private fun applyFullscreen() {
         val decorView = window.decorView
         val visibilityChangeListener = OnSystemUiVisibilityChangeListener { visibility: Int ->
             if (!isInMultiWindowMode) {
@@ -73,20 +73,27 @@ abstract class FullScreenAppCompatActivity : AbstractAppCompatActivity() {
         decorView.setOnSystemUiVisibilityChangeListener(visibilityChangeListener)
         visibilityChangeListener.onSystemUiVisibilityChange(decorView.systemUiVisibility) //call it once since the UI state may not change after the call, so the activity wont become fullscreen
 
-        ignoreNotch()
+        refreshIgnoreNotch()
     }
 
-    private fun ignoreNotch() {
+    fun refreshIgnoreNotch() {
         if (Build.VERSION.SDK_INT >= VERSION_CODES.P) {
-            window.attributes.layoutInDisplayCutoutMode = if (isIgnoreNotch()) {
+            val mode = if (isIgnoreNotch()) {
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
             } else {
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
             }
-            window.setFlags(
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-            )
+
+            val params = window.attributes
+
+            if (params.layoutInDisplayCutoutMode != mode) {
+                params.layoutInDisplayCutoutMode = mode
+
+                window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
+                window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
+
+                window.attributes = params
+            }
         }
     }
 }
@@ -98,6 +105,6 @@ abstract class FullScreenAppCompatActivity : AbstractAppCompatActivity() {
 fun ObserveFullScreenSetting(fullScreen: Boolean) {
     val activity = LocalActivity.current as? FullScreenAppCompatActivity ?: return
     LaunchedEffect(fullScreen) {
-        activity.applyFullscreen()
+        activity.refreshIgnoreNotch()
     }
 }

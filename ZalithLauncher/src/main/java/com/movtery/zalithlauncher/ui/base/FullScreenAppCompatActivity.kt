@@ -33,7 +33,7 @@ abstract class FullScreenAppCompatActivity : AbstractAppCompatActivity() {
     /**
      * @return 决定是否忽略前置摄像头区域
      */
-    open fun isIgnoreNotch(): Boolean = true
+    protected open fun isIgnoreNotch(): Boolean = true
 
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {

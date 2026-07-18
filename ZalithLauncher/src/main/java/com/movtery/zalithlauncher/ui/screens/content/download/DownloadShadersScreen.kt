@@ -121,14 +121,16 @@ fun DownloadShadersScreen(
                         mainScreenKey = mainScreenKey,
                         downloadScreenKey = downloadScreenKey,
                         downloadShadersScreenKey = key,
-                        downloadShadersScreenCurrentKey = downloadShadersScreenKey
-                    ) { platform, projectId, _ ->
-                        backStack.navigateTo(
-                            NormalNavKey.DownloadAssets(platform, projectId, PlatformClasses.SHADERS)
-                        )
-                    } onQuickDownload = { platform, projectId, classes ->
-                        operation = DownloadSingleOperation.QuickDownload(platform, projectId, classes)
-                    }
+                        downloadShadersScreenCurrentKey = downloadShadersScreenKey,
+                        swapToDownload = { platform, projectId, _ ->
+                            backStack.navigateTo(
+                                NormalNavKey.DownloadAssets(platform, projectId, PlatformClasses.SHADERS)
+                            )
+                        },
+                        onQuickDownload = { platform, projectId, classes ->
+                            operation = DownloadSingleOperation.QuickDownload(platform, projectId, classes)
+                        }
+                    )
                 }
                 entry<NormalNavKey.DownloadAssets> { assetsKey ->
                     DownloadAssetsScreen(

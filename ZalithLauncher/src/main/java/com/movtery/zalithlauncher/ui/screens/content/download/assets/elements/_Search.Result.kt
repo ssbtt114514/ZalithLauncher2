@@ -591,7 +591,7 @@ fun ResultProjectLayout(
                     }
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_download_outlined),
+                        painter = painterResource(R.drawable.ic_download_2_outlined),
                         contentDescription = stringResource(R.string.download_quick_download),
                         modifier = Modifier.size(24.dp)
                     )

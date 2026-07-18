@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -41,12 +42,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -62,7 +63,7 @@ import com.movtery.zalithlauncher.game.download.assets.platform.PlatformClasses
 import com.movtery.zalithlauncher.game.download.assets.platform.PlatformDependencyType
 import com.movtery.zalithlauncher.game.download.assets.platform.PlatformProject
 import com.movtery.zalithlauncher.game.download.assets.platform.PlatformVersion
-import com.movtery.zalithlauncher.game.download.assets.platform.getProject
+import com.movtery.zalithlauncher.game.download.assets.platform.getProjectByVersion
 import com.movtery.zalithlauncher.game.download.assets.platform.getVersions
 import com.movtery.zalithlauncher.game.version.installed.Version
 import com.movtery.zalithlauncher.game.version.installed.VersionsManager
@@ -70,6 +71,7 @@ import com.movtery.zalithlauncher.ui.components.MarqueeText
 import com.movtery.zalithlauncher.ui.components.ScalingLabel
 import com.movtery.zalithlauncher.ui.theme.cardColor
 import com.movtery.zalithlauncher.ui.theme.onCardColor
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -111,9 +113,11 @@ private class QuickDownloadViewModel(
         private set
 
     private val processedProjects = mutableSetOf<String>()
+    private var resolveJob: Job? = null
 
     fun start() {
-        viewModelScope.launch {
+        resolveJob?.cancel()
+        resolveJob = viewModelScope.launch {
             state = QuickDownloadState.Loading
             processedProjects.clear()
 
@@ -123,7 +127,7 @@ private class QuickDownloadViewModel(
             }
 
             val mcVersion = gameVersion.getVersionInfo()?.minecraftVersion ?: run {
-                state = QuickDownloadState.Error("无法获取当前游戏版本的 Minecraft 版本")
+                state = QuickDownloadState.Error("Failed to get Minecraft version")
                 return@launch
             }
 
@@ -137,7 +141,7 @@ private class QuickDownloadViewModel(
 
                 state = QuickDownloadState.Ready(targetProject, targetVersion, deps)
             } catch (e: Exception) {
-                state = QuickDownloadState.Error(e.message ?: "下载失败")
+                state = QuickDownloadState.Error(e.message ?: "Download failed")
             }
         }
     }
@@ -150,6 +154,7 @@ private class QuickDownloadViewModel(
     ): Triple<PlatformProject, PlatformVersion, List<Pair<PlatformProject, PlatformVersion>>> {
         val deps = mutableListOf<Pair<PlatformProject, PlatformVersion>>()
         val semaphore = Semaphore(8)
+        val processedLock = Any()
 
         fun isVersionCompatible(version: PlatformVersion): Boolean {
             val gameVersions = version.platformGameVersion()
@@ -162,52 +167,52 @@ private class QuickDownloadViewModel(
         }
 
         suspend fun processProject(currentPlatform: Platform, currentProjectId: String): Pair<PlatformProject, PlatformVersion> {
-            if (currentProjectId in processedProjects) {
-                throw IllegalStateException("循环依赖: $currentProjectId")
-            }
-            processedProjects.add(currentProjectId)
+            val project = getProjectByVersion(currentProjectId, currentPlatform)
 
-            val project = getProject(currentProjectId, currentPlatform) { _, _ -> }
+            val versions = getVersions(currentProjectId, currentPlatform)
+                .filter { isVersionCompatible(it) }
 
-            var versionsResult: List<PlatformVersion> = emptyList()
-            getVersions(
-                projectID = currentProjectId,
-                platform = currentPlatform,
-                onSuccess = { result ->
-                    versionsResult = result
-                },
-                onError = { _, _ -> }
-            )
-
-            val versions = versionsResult.filter { isVersionCompatible(it) }
             if (versions.isEmpty()) {
-                throw IllegalStateException("项目 ${project.platformTitle()} 没有兼容的版本")
+                error("No compatible version for project ${project.platformTitle()}")
             }
 
             val latestVersion = versions.maxByOrNull { it.platformDatePublished() } ?: versions.first()
 
-            for (dep in latestVersion.platformDependencies()) {
-                if (dep.type == PlatformDependencyType.REQUIRED && dep.projectId.isNotEmpty()) {
-                    semaphore.withPermit {
-                        val depResult = processProject(dep.platform, dep.projectId)
-                        if (depResult.first.platformSlug() !in processedProjects) {
-                            deps.add(depResult)
+            val requiredDeps = latestVersion.platformDependencies()
+                .filter { it.type == PlatformDependencyType.REQUIRED && it.projectId.isNotEmpty() }
+
+            if (requiredDeps.isNotEmpty()) {
+                val depResults = requiredDeps.map { dep ->
+                    async {
+                        semaphore.withPermit {
+                            val alreadyProcessed = synchronized(processedLock) {
+                                dep.projectId in processedProjects
+                            }
+                            if (alreadyProcessed) return@async null
+                            synchronized(processedLock) {
+                                processedProjects.add(dep.projectId)
+                            }
+                            runCatching {
+                                processProject(dep.platform, dep.projectId)
+                            }.getOrNull()
                         }
                     }
+                }.awaitAll().filterNotNull()
+
+                synchronized(deps) {
+                    deps.addAll(depResults)
                 }
             }
 
             return project to latestVersion
         }
 
-        return semaphore.withPermit {
-            val result = processProject(platform, projectId)
-            Triple(result.first, result.second, deps)
-        }
+        val result = processProject(platform, projectId)
+        return Triple(result.first, result.second, deps)
     }
 
     override fun onCleared() {
-        viewModelScope.cancel()
+        resolveJob?.cancel()
     }
 }
 
@@ -234,7 +239,9 @@ fun QuickDownloadDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         BoxWithConstraints(
-            modifier = Modifier.fillMaxWidth(0.8f).fillMaxHeight(),
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .fillMaxHeight(),
             contentAlignment = Alignment.Center
         ) {
             Surface(
@@ -260,7 +267,7 @@ fun QuickDownloadDialog(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                LinearWavyProgressIndicator(modifier = Modifier.width(168.dp), wavelength = 32.dp)
+                                LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth(0.6f), wavelength = 32.dp)
                                 Text(
                                     text = stringResource(R.string.download_quick_download_resolving),
                                     style = MaterialTheme.typography.bodyMedium
@@ -270,7 +277,7 @@ fun QuickDownloadDialog(
 
                         QuickDownloadState.NoGameVersion -> {
                             ScalingLabel(
-                                modifier = Modifier.align(Alignment.Center),
+                                modifier = Modifier.align(Alignment.CenterHorizontally),
                                 text = {
                                     Text(stringResource(R.string.download_assets_no_installed_versions))
                                 },
@@ -280,7 +287,7 @@ fun QuickDownloadDialog(
 
                         is QuickDownloadState.Error -> {
                             ScalingLabel(
-                                modifier = Modifier.align(Alignment.Center),
+                                modifier = Modifier.align(Alignment.CenterHorizontally),
                                 text = {
                                     Text(state.message)
                                 },
@@ -301,7 +308,7 @@ fun QuickDownloadDialog(
 
                             val listState = rememberLazyListState()
                             LazyColumn(
-                                modifier = Modifier.weight(1f).fillMaxWidth(),
+                                modifier = Modifier.weight(1f, fill = false).fillMaxWidth().heightIn(max = 300.dp),
                                 contentPadding = PaddingValues(vertical = 8.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                                 state = listState
@@ -310,7 +317,7 @@ fun QuickDownloadDialog(
                                     QuickDownloadItem(
                                         project = project,
                                         version = version,
-                                        isMain = project.platformSlug() == projectId
+                                        isMain = project.platformId() == projectId
                                     )
                                 }
                             }
@@ -361,7 +368,6 @@ private fun QuickDownloadItem(
     isMain: Boolean
 ) {
     val context = LocalContext.current
-    val platform = remember { project.platform() }
     val title = remember { project.platformTitle() }
     val summary = remember { project.platformSummary() }
     val iconUrl = remember { project.platformIconUrl() }
@@ -404,13 +410,13 @@ private fun QuickDownloadItem(
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.alpha(0.7f)
+                        modifier = Modifier.padding(top = 2.dp)
                     )
                 }
                 Text(
                     text = version.platformVersion(),
                     style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.alpha(0.6f)
+                    modifier = Modifier.padding(top = 2.dp)
                 )
             }
         }

@@ -153,14 +153,16 @@ fun DownloadSavesScreen(
                         mainScreenKey = mainScreenKey,
                         downloadScreenKey = downloadScreenKey,
                         downloadSavesScreenKey = key,
-                        downloadSavesScreenCurrentKey = downloadSavesScreenKey
-                    ) { platform, projectId, _ ->
-                        backStack.navigateTo(
-                            NormalNavKey.DownloadAssets(platform, projectId, PlatformClasses.SAVES)
-                        )
-                    } onQuickDownload = { platform, projectId, classes ->
-                        operation = DownloadSingleOperation.QuickDownload(platform, projectId, classes)
-                    }
+                        downloadSavesScreenCurrentKey = downloadSavesScreenKey,
+                        swapToDownload = { platform, projectId, _ ->
+                            backStack.navigateTo(
+                                NormalNavKey.DownloadAssets(platform, projectId, PlatformClasses.SAVES)
+                            )
+                        },
+                        onQuickDownload = { platform, projectId, classes ->
+                            operation = DownloadSingleOperation.QuickDownload(platform, projectId, classes)
+                        }
+                    )
                 }
                 entry<NormalNavKey.DownloadAssets> { assetsKey ->
                     DownloadAssetsScreen(

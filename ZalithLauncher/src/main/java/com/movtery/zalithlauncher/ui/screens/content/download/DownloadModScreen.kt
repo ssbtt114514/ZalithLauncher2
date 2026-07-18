@@ -121,14 +121,16 @@ fun DownloadModScreen(
                         mainScreenKey = mainScreenKey,
                         downloadScreenKey = downloadScreenKey,
                         downloadModScreenKey = key,
-                        downloadModScreenCurrentKey = downloadModScreenKey
-                    ) { platform, projectId, _ ->
-                        backStack.navigateTo(
-                            NormalNavKey.DownloadAssets(platform, projectId, PlatformClasses.MOD)
-                        )
-                    } onQuickDownload = { platform, projectId, classes ->
-                        operation = DownloadSingleOperation.QuickDownload(platform, projectId, classes)
-                    }
+                        downloadModScreenCurrentKey = downloadModScreenKey,
+                        swapToDownload = { platform, projectId, _ ->
+                            backStack.navigateTo(
+                                NormalNavKey.DownloadAssets(platform, projectId, PlatformClasses.MOD)
+                            )
+                        },
+                        onQuickDownload = { platform, projectId, classes ->
+                            operation = DownloadSingleOperation.QuickDownload(platform, projectId, classes)
+                        }
+                    )
                 }
                 entry<NormalNavKey.DownloadAssets> { assetsKey ->
                     DownloadAssetsScreen(

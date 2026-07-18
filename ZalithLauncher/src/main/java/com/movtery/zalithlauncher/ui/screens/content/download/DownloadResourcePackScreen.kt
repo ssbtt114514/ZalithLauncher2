@@ -121,14 +121,16 @@ fun DownloadResourcePackScreen(
                         mainScreenKey = mainScreenKey,
                         downloadScreenKey = downloadScreenKey,
                         downloadResourcePackScreenKey = key,
-                        downloadResourcePackScreenCurrentKey = downloadResourcePackScreenKey
-                    ) { platform, projectId, _ ->
-                        backStack.navigateTo(
-                            NormalNavKey.DownloadAssets(platform, projectId, PlatformClasses.RESOURCE_PACK)
-                        )
-                    } onQuickDownload = { platform, projectId, classes ->
-                        operation = DownloadSingleOperation.QuickDownload(platform, projectId, classes)
-                    }
+                        downloadResourcePackScreenCurrentKey = downloadResourcePackScreenKey,
+                        swapToDownload = { platform, projectId, _ ->
+                            backStack.navigateTo(
+                                NormalNavKey.DownloadAssets(platform, projectId, PlatformClasses.RESOURCE_PACK)
+                            )
+                        },
+                        onQuickDownload = { platform, projectId, classes ->
+                            operation = DownloadSingleOperation.QuickDownload(platform, projectId, classes)
+                        }
+                    )
                 }
                 entry<NormalNavKey.DownloadAssets> { assetsKey ->
                     DownloadAssetsScreen(

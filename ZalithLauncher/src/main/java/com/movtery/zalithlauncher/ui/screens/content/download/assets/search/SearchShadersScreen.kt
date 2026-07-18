@@ -35,7 +35,8 @@ fun SearchShadersScreen(
     downloadScreenKey: TitledNavKey?,
     downloadShadersScreenKey: TitledNavKey,
     downloadShadersScreenCurrentKey: TitledNavKey?,
-    swapToDownload: (Platform, projectId: String, iconUrl: String?) -> Unit = { _, _, _ -> }
+    swapToDownload: (Platform, projectId: String, iconUrl: String?) -> Unit = { _, _, _ -> },
+    onQuickDownload: (Platform, String, PlatformClasses) -> Unit = { _, _, _ -> }
 ) {
     val initialPlatform = remember {
         AllSettings.searchShadersPlatform.getValue()
@@ -68,6 +69,7 @@ fun SearchShadersScreen(
                 }
             }
         },
-        swapToDownload = swapToDownload
+        swapToDownload = swapToDownload,
+        onQuickDownload = onQuickDownload
     )
 }

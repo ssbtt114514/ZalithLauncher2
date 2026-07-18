@@ -40,6 +40,7 @@ import com.movtery.zalithlauncher.ui.screens.NormalNavKey
 import com.movtery.zalithlauncher.ui.screens.TitledNavKey
 import com.movtery.zalithlauncher.ui.screens.content.download.assets.download.DownloadAssetsScreen
 import com.movtery.zalithlauncher.ui.screens.content.download.assets.elements.DownloadSingleOperation
+import com.movtery.zalithlauncher.ui.screens.content.download.assets.elements.QuickDownloadInfo
 import com.movtery.zalithlauncher.ui.screens.content.download.assets.search.SearchSavesScreen
 import com.movtery.zalithlauncher.ui.screens.navigateTo
 import com.movtery.zalithlauncher.ui.screens.onBack
@@ -101,6 +102,35 @@ fun DownloadSavesScreen(
             backStack.navigateTo(
                 NormalNavKey.DownloadAssets(dep.platform, dep.projectId, classes)
             )
+        },
+        onQuickDownloadStart = { info ->
+            downloadSingleForVersions(
+                version = info.targetVersion,
+                versions = info.gameVersions,
+                folder = info.classes.versionFolder.folderName,
+                onFileCopied = { file, folder ->
+                    unpackSaveZip(
+                        zipFile = file,
+                        targetPath = folder
+                    )
+                },
+                onFileCancelled = { file, folder ->
+                    CoroutineScope(Dispatchers.IO).launch {
+                        FileUtils.deleteQuietly(
+                            File(folder, file.nameWithoutExtension)
+                        )
+                    }
+                },
+                submitError = submitError
+            )
+            info.dependencyVersions.forEach { depVersion ->
+                downloadSingleForVersions(
+                    version = depVersion,
+                    versions = info.gameVersions,
+                    folder = info.classes.versionFolder.folderName,
+                    submitError = submitError
+                )
+            }
         }
     )
 
@@ -128,6 +158,8 @@ fun DownloadSavesScreen(
                         backStack.navigateTo(
                             NormalNavKey.DownloadAssets(platform, projectId, PlatformClasses.SAVES)
                         )
+                    } onQuickDownload = { platform, projectId, classes ->
+                        operation = DownloadSingleOperation.QuickDownload(platform, projectId, classes)
                     }
                 }
                 entry<NormalNavKey.DownloadAssets> { assetsKey ->

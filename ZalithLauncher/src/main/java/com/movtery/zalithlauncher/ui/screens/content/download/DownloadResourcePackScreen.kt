@@ -39,6 +39,7 @@ import com.movtery.zalithlauncher.ui.screens.NormalNavKey
 import com.movtery.zalithlauncher.ui.screens.TitledNavKey
 import com.movtery.zalithlauncher.ui.screens.content.download.assets.download.DownloadAssetsScreen
 import com.movtery.zalithlauncher.ui.screens.content.download.assets.elements.DownloadSingleOperation
+import com.movtery.zalithlauncher.ui.screens.content.download.assets.elements.QuickDownloadInfo
 import com.movtery.zalithlauncher.ui.screens.content.download.assets.search.SearchResourcePackScreen
 import com.movtery.zalithlauncher.ui.screens.navigateTo
 import com.movtery.zalithlauncher.ui.screens.onBack
@@ -82,6 +83,22 @@ fun DownloadResourcePackScreen(
             backStack.navigateTo(
                 NormalNavKey.DownloadAssets(dep.platform, dep.projectId, classes)
             )
+        },
+        onQuickDownloadStart = { info ->
+            downloadSingleForVersions(
+                version = info.targetVersion,
+                versions = info.gameVersions,
+                folder = info.classes.versionFolder.folderName,
+                submitError = submitError
+            )
+            info.dependencyVersions.forEach { depVersion ->
+                downloadSingleForVersions(
+                    version = depVersion,
+                    versions = info.gameVersions,
+                    folder = info.classes.versionFolder.folderName,
+                    submitError = submitError
+                )
+            }
         }
     )
 
@@ -109,6 +126,8 @@ fun DownloadResourcePackScreen(
                         backStack.navigateTo(
                             NormalNavKey.DownloadAssets(platform, projectId, PlatformClasses.RESOURCE_PACK)
                         )
+                    } onQuickDownload = { platform, projectId, classes ->
+                        operation = DownloadSingleOperation.QuickDownload(platform, projectId, classes)
                     }
                 }
                 entry<NormalNavKey.DownloadAssets> { assetsKey ->

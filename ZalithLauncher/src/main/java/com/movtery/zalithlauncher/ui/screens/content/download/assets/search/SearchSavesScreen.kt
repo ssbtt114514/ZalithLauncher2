@@ -31,7 +31,8 @@ fun SearchSavesScreen(
     downloadScreenKey: TitledNavKey?,
     downloadSavesScreenKey: TitledNavKey,
     downloadSavesScreenCurrentKey: TitledNavKey?,
-    swapToDownload: (Platform, projectId: String, iconUrl: String?) -> Unit = { _, _, _ -> }
+    swapToDownload: (Platform, projectId: String, iconUrl: String?) -> Unit = { _, _, _ -> },
+    onQuickDownload: (Platform, String, PlatformClasses) -> Unit = { _, _, _ -> }
 ) {
     SearchAssetsScreen(
         mainScreenKey = mainScreenKey,
@@ -46,6 +47,7 @@ fun SearchSavesScreen(
         mapCategories = { platform, string ->
             CurseForgeSavesCategory.entries.find { it.describe() == string }
         },
-        swapToDownload = swapToDownload
+        swapToDownload = swapToDownload,
+        onQuickDownload = onQuickDownload
     )
 }

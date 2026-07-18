@@ -35,7 +35,8 @@ fun SearchResourcePackScreen(
     downloadScreenKey: TitledNavKey?,
     downloadResourcePackScreenKey: TitledNavKey,
     downloadResourcePackScreenCurrentKey: TitledNavKey?,
-    swapToDownload: (Platform, projectId: String, iconUrl: String?) -> Unit = { _, _, _ -> }
+    swapToDownload: (Platform, projectId: String, iconUrl: String?) -> Unit = { _, _, _ -> },
+    onQuickDownload: (Platform, String, PlatformClasses) -> Unit = { _, _, _ -> }
 ) {
     val initialPlatform = remember {
         AllSettings.searchResourcePackPlatform.getValue()
@@ -68,6 +69,7 @@ fun SearchResourcePackScreen(
                 }
             }
         },
-        swapToDownload = swapToDownload
+        swapToDownload = swapToDownload,
+        onQuickDownload = onQuickDownload
     )
 }

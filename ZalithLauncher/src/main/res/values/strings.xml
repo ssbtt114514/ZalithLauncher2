@@ -189,6 +189,10 @@
     <string name="unofficial_version_message">This is not an official version and may have issues. It is recommended to use the official version.</string>
     <string name="unofficial_version_get_official">Get Official</string>
     <string name="unofficial_version_continue">I understand, continue</string>
+    <string name="download_quick_download">Quick Download</string>
+    <string name="download_quick_download_resolving">Resolving dependencies...</string>
+    <string name="download_quick_download_list">Download List</string>
+    <string name="download_quick_download_main">Main</string>
     <string name="download_game_failed_to_get_versions">Failed to get version: %s. Tap to retry.</string>
     <string name="download_game_type_release">Release</string>
     <string name="download_game_type_snapshot">Snapshot</string>

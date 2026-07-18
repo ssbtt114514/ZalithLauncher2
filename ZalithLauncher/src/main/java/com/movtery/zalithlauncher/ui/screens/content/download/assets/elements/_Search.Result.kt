@@ -124,7 +124,8 @@ fun ResultListLayout(
     onPreviousPage: (pageNumber: Int) -> Unit,
     onNextPage: (pageNumber: Int, isLastPage: Boolean) -> Unit,
     onNavigatePage: (Int) -> Unit,
-    swapToDownload: (Platform, projectId: String, iconUrl: String?) -> Unit = { _, _, _ -> }
+    swapToDownload: (Platform, projectId: String, iconUrl: String?) -> Unit = { _, _, _ -> },
+    onQuickDownload: (Platform, String, PlatformClasses) -> Unit = { _, _, _ -> }
 ) {
     when (searchState) {
         is SearchAssetsState.Searching -> {
@@ -164,7 +165,8 @@ fun ResultListLayout(
                     contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 60.dp, bottom = 6.dp),
                     classes = classes,
                     data = page.data,
-                    swapToDownload = swapToDownload
+                    swapToDownload = swapToDownload,
+                    onQuickDownload = onQuickDownload
                 )
 
                 val targetScale = 1f - (1f - controllerMinScale) * fraction
@@ -361,7 +363,8 @@ private fun ResultList(
     contentPadding: PaddingValues = PaddingValues(),
     classes: PlatformClasses,
     data: List<Pair<PlatformSearchData, ModTranslations.McMod?>>,
-    swapToDownload: (Platform, projectId: String, iconUrl: String?) -> Unit = { _, _, _ -> }
+    swapToDownload: (Platform, projectId: String, iconUrl: String?) -> Unit = { _, _, _ -> },
+    onQuickDownload: (Platform, String, PlatformClasses) -> Unit = { _, _, _ -> }
 ) {
     val context = LocalContext.current
     LazyColumn(
@@ -397,7 +400,8 @@ private fun ResultList(
                 categories = categories?.sortedWith { o1, o2 -> o1.index() - o2.index() },
                 onClick = {
                     swapToDownload(platform, item.platformId(), iconUrl)
-                }
+                },
+                onQuickDownload = onQuickDownload
             )
         }
     }
@@ -423,7 +427,8 @@ fun ResultProjectLayout(
     color: Color = cardColor(influencedByBackground),
     contentColor: Color = onCardColor(),
     blur: Int = AllSettings.backgroundBlur.state,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    onQuickDownload: (Platform, String, PlatformClasses) -> Unit = { _, _, _ -> }
 ) {
     val context = LocalContext.current
 
@@ -575,6 +580,21 @@ fun ResultProjectLayout(
                     if (classes != null) {
                         ClassesIdentifier(classes = classes)
                     }
+                }
+            }
+
+            classes?.let {
+                IconButton(
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    onClick = {
+                        onQuickDownload(platform, projectId, it)
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_download_outlined),
+                        contentDescription = stringResource(R.string.download_quick_download),
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             }
         }

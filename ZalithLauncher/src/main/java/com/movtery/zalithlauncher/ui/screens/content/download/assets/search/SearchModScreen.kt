@@ -37,7 +37,8 @@ fun SearchModScreen(
     downloadScreenKey: TitledNavKey?,
     downloadModScreenKey: TitledNavKey,
     downloadModScreenCurrentKey: TitledNavKey?,
-    swapToDownload: (Platform, projectId: String, iconUrl: String?) -> Unit = { _, _, _ -> }
+    swapToDownload: (Platform, projectId: String, iconUrl: String?) -> Unit = { _, _, _ -> },
+    onQuickDownload: (Platform, String, PlatformClasses) -> Unit = { _, _, _ -> }
 ) {
     val initialPlatform = remember {
         AllSettings.searchModPlatform.getValue()
@@ -77,6 +78,7 @@ fun SearchModScreen(
                 }
             }
         },
-        swapToDownload = swapToDownload
+        swapToDownload = swapToDownload,
+        onQuickDownload = onQuickDownload
     )
 }

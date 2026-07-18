@@ -63,6 +63,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.movtery.zalithlauncher.R
+import com.movtery.zalithlauncher.game.download.assets.platform.Platform
 import com.movtery.zalithlauncher.game.download.assets.platform.PlatformClasses
 import com.movtery.zalithlauncher.game.download.assets.platform.PlatformDependencyType
 import com.movtery.zalithlauncher.game.download.assets.platform.PlatformProject
@@ -101,6 +102,12 @@ sealed interface DownloadSingleOperation {
         val version: PlatformVersion,
         val versions: List<Version>
     ) : DownloadSingleOperation
+    /** 一键下载：从搜索结果页直接下载，自动解析所有前置依赖 */
+    data class QuickDownload(
+        val platform: Platform,
+        val projectId: String,
+        val classes: PlatformClasses
+    ) : DownloadSingleOperation
 }
 
 @Composable
@@ -108,7 +115,8 @@ fun DownloadSingleOperation(
     operation: DownloadSingleOperation,
     changeOperation: (DownloadSingleOperation) -> Unit,
     doInstall: (PlatformClasses, PlatformVersion, List<Version>) -> Unit,
-    onDependencyClicked: (PlatformVersion.PlatformDependency, PlatformClasses) -> Unit = { _, _ -> }
+    onDependencyClicked: (PlatformVersion.PlatformDependency, PlatformClasses) -> Unit = { _, _ -> },
+    onQuickDownloadStart: (QuickDownloadInfo) -> Unit = {}
 ) {
     when (operation) {
         DownloadSingleOperation.None -> {}
@@ -121,7 +129,6 @@ fun DownloadSingleOperation(
                     changeOperation(DownloadSingleOperation.None)
                 },
                 onConfirm = {
-                    //用户坚持使用移动网络
                     changeOperation(
                         DownloadSingleOperation.SelectVersion(
                             classes = operation.classes,
@@ -154,6 +161,20 @@ fun DownloadSingleOperation(
         is DownloadSingleOperation.Install -> {
             doInstall(operation.classes, operation.version, operation.versions)
             changeOperation(DownloadSingleOperation.None)
+        }
+        is DownloadSingleOperation.QuickDownload -> {
+            QuickDownloadDialog(
+                platform = operation.platform,
+                projectId = operation.projectId,
+                classes = operation.classes,
+                onDismiss = {
+                    changeOperation(DownloadSingleOperation.None)
+                },
+                onDownload = { info ->
+                    changeOperation(DownloadSingleOperation.None)
+                    onQuickDownloadStart(info)
+                }
+            )
         }
     }
 }

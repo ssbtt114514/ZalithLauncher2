@@ -189,6 +189,10 @@
     <string name="unofficial_version_message">该版本非官方版，可能存在问题，建议使用官方版本。</string>
     <string name="unofficial_version_get_official">获取官方版</string>
     <string name="unofficial_version_continue">我已知晓，继续使用</string>
+    <string name="download_quick_download">一键下载</string>
+    <string name="download_quick_download_resolving">正在解析依赖...</string>
+    <string name="download_quick_download_list">下载列表</string>
+    <string name="download_quick_download_main">主资源</string>
     <string name="download_game_failed_to_get_versions">获取版本失败：%s，点击重试。</string>
     <string name="download_game_type_release">正式版</string>
     <string name="download_game_type_snapshot">快照版</string>

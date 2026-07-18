@@ -269,6 +269,7 @@ fun SearchAssetsScreen(
     getModloaders: (Platform) -> List<PlatformDisplayLabel> = { emptyList() },
     mapCategories: (Platform, String) -> PlatformFilterCode?,
     swapToDownload: (Platform, projectId: String, iconUrl: String?) -> Unit = { _, _, _ -> },
+    onQuickDownload: (Platform, String, PlatformClasses) -> Unit = { _, _, _ -> },
     extraFilter: (LazyListScope.() -> Unit)? = null
 ) {
     val viewModel: SearchScreenViewModel = rememberSearchAssetsViewModel(
@@ -305,6 +306,7 @@ fun SearchAssetsScreen(
                     viewModel.search()
                 },
                 swapToDownload = swapToDownload,
+                onQuickDownload = onQuickDownload,
                 onPreviousPage = { pageNumber ->
                     previousPage(
                         pageNumber = pageNumber,

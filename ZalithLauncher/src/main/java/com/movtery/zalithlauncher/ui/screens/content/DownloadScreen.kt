@@ -134,6 +134,7 @@ private fun TabMenu(
         CategoryItem(backScreenViewModel.downloadSavesScreen, { CategoryIcon(R.drawable.ic_public, R.string.download_category_saves) }, R.string.download_category_saves),
         CategoryItem(backScreenViewModel.downloadShadersScreen, { CategoryIcon(R.drawable.ic_lightbulb, R.string.download_category_shaders) }, R.string.download_category_shaders),
         CategoryItem(NormalNavKey.SearchId, { CategoryIcon(R.drawable.ic_card, R.string.download_category_by_id) }, R.string.download_category_by_id, division = true),
+        CategoryItem(backScreenViewModel.downloadFavoritesScreen, { CategoryIcon(R.drawable.ic_favorite_outlined, R.string.download_category_favorites) }, R.string.download_category_favorites),
     )
 
     val xOffset by swapAnimateDpAsState(
@@ -287,6 +288,20 @@ private fun NavigationUI(
                         },
                         submitError = submitError,
                         eventViewModel = eventViewModel
+                    )
+                }
+                entry<NestedNavKey.DownloadFavorites> { key ->
+                    DownloadFavoritesScreen(
+                        key = key,
+                        mainScreenKey = backScreenViewModel.mainScreen.currentKey,
+                        downloadScreenKey = backScreenViewModel.downloadScreen.currentKey,
+                        downloadFavoritesScreenKey = backScreenViewModel.downloadFavoritesScreen.currentKey,
+                        onCurrentKeyChange = { newKey ->
+                            backScreenViewModel.downloadFavoritesScreen.currentKey = newKey
+                        },
+                        submitError = submitError,
+                        eventViewModel = eventViewModel,
+                        backScreenViewModel = backScreenViewModel
                     )
                 }
                 entry<NormalNavKey.SearchId> {

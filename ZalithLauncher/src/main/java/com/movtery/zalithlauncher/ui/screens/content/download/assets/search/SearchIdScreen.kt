@@ -396,6 +396,7 @@ private fun ResultLayout(
                 platform = platform,
                 title = mcmod.getMcmodTitle(title, context),
                 description = description,
+                projectId = project.platformId(),
                 classes = classes,
                 iconUrl = iconUrl,
                 author = author,

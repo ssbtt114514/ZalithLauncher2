@@ -81,6 +81,9 @@ import androidx.compose.ui.unit.dp
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.download.assets.platform.Platform
 import com.movtery.zalithlauncher.game.download.assets.platform.PlatformClasses
+import com.movtery.zalithlauncher.game.download.favorites.FavoriteItem
+import com.movtery.zalithlauncher.game.download.favorites.FavoriteType
+import com.movtery.zalithlauncher.game.download.favorites.FavoritesManager
 import com.movtery.zalithlauncher.game.download.assets.platform.PlatformDisplayLabel
 import com.movtery.zalithlauncher.game.download.assets.platform.PlatformFilterCode
 import com.movtery.zalithlauncher.game.download.assets.platform.PlatformSearchData
@@ -384,6 +387,7 @@ private fun ResultList(
                 platform = platform,
                 title = mcmod.getMcmodTitle(title, context),
                 description = description,
+                projectId = item.platformId(),
                 iconUrl = iconUrl,
                 author = author,
                 downloads = downloads,
@@ -404,6 +408,7 @@ fun ResultProjectLayout(
     platform: Platform,
     title: String,
     description: String,
+    projectId: String = "",
     classes: PlatformClasses? = null,
     iconUrl: String? = null,
     author: String? = null,
@@ -515,6 +520,30 @@ fun ResultProjectLayout(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    //收藏按钮（位于目标平台 modloaders 左边）
+                    val favoriteType = classes?.let { classesToFavoriteType(it) } ?: FavoriteType.MOD
+                    val isFav = FavoritesManager.isFavorite(favoriteType, projectId, platform.name)
+                    val modLoaderNames = modloaders?.map { it.getDisplayName() } ?: emptyList()
+                    val categoryNames = categories?.map { stringResource(it.getDisplayName()) } ?: emptyList()
+                    FavoriteToggleButton(
+                        isFavorite = isFav,
+                        onToggleFavorite = {
+                            val item = FavoriteItem(
+                                type = favoriteType,
+                                platform = platform.name,
+                                projectId = projectId,
+                                title = title,
+                                iconUrl = iconUrl,
+                                description = description,
+                                author = author,
+                                modLoaders = modLoaderNames,
+                                categories = categoryNames,
+                                downloadCount = downloads,
+                                followerCount = follows ?: 0L
+                            )
+                            FavoritesManager.toggle(item)
+                        }
+                    )
                     //标签栏
                     Row(
                         modifier = Modifier
@@ -598,4 +627,43 @@ fun ProjectTitleHead(
         //平台标签
         PlatformIdentifier(platform = platform)
     }
+}
+
+/**
+ * 资源卡片上的收藏切换按钮。
+ *
+ * 点击后切换收藏状态，按钮显示对应的图标（已收藏 = 填充心形，未收藏 = 描边心形）。
+ *
+ * @param isFavorite         当前是否已收藏
+ * @param onToggleFavorite   点击切换收藏的回调
+ */
+@Composable
+private fun FavoriteToggleButton(
+    isFavorite: Boolean,
+    onToggleFavorite: () -> Unit
+) {
+    IconButton(
+        modifier = Modifier.size(32.dp),
+        onClick = onToggleFavorite
+    ) {
+        Icon(
+            painter = painterResource(
+                if (isFavorite) R.drawable.ic_favorite_filled
+                else R.drawable.ic_favorite_outlined
+            ),
+            contentDescription = null,
+            tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+/**
+ * [PlatformClasses] 转 [FavoriteType]。
+ */
+private fun classesToFavoriteType(classes: PlatformClasses): FavoriteType = when (classes) {
+    PlatformClasses.MOD -> FavoriteType.MOD
+    PlatformClasses.MOD_PACK -> FavoriteType.MOD_PACK
+    PlatformClasses.RESOURCE_PACK -> FavoriteType.RESOURCE_PACK
+    PlatformClasses.SAVES -> FavoriteType.SAVES
+    PlatformClasses.SHADERS -> FavoriteType.SHADERS
 }

@@ -72,6 +72,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.movtery.zalithlauncher.R
+import com.movtery.zalithlauncher.game.download.favorites.FavoriteItem
+import com.movtery.zalithlauncher.game.download.favorites.FavoriteType
+import com.movtery.zalithlauncher.game.download.favorites.FavoritesManager
 import com.movtery.zalithlauncher.game.versioninfo.MinecraftVersion
 import com.movtery.zalithlauncher.game.versioninfo.MinecraftVersions
 import com.movtery.zalithlauncher.game.versioninfo.models.isType
@@ -521,6 +524,35 @@ private fun VersionItemLayout(
                         pattern = stringResource(R.string.date_format)
                     ),
                     style = MaterialTheme.typography.labelMedium
+                )
+            }
+
+            //收藏按钮（位于 Wiki 链接图标的左边）
+            val versionId = version.version.id
+            val gameVersionType = version.type.name
+            val isFav = FavoritesManager.isFavorite(FavoriteType.GAME_VERSION, versionId, null)
+            IconButton(
+                modifier = Modifier.size(32.dp),
+                onClick = {
+                    val item = FavoriteItem(
+                        type = FavoriteType.GAME_VERSION,
+                        platform = null,
+                        projectId = versionId,
+                        title = versionId,
+                        description = summary ?: "",
+                        gameVersionType = gameVersionType,
+                        gameReleaseTime = version.version.releaseTime
+                    )
+                    FavoritesManager.toggle(item)
+                }
+            ) {
+                Icon(
+                    painter = painterResource(
+                        if (isFav) R.drawable.ic_favorite_filled
+                        else R.drawable.ic_favorite_outlined
+                    ),
+                    contentDescription = "Favorite",
+                    tint = if (isFav) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 

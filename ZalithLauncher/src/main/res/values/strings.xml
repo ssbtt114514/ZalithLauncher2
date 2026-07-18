@@ -178,6 +178,13 @@
     <string name="download_category_saves">Saves</string>
     <string name="download_category_shaders">Shader Pack</string>
     <string name="download_category_by_id">Search by ID</string>
+    <string name="download_category_favorites">Favorites</string>
+    <string name="favorites_empty">No favorites yet. Tap the heart icon on a resource card to add it here.</string>
+    <string name="favorites_filter_all">All</string>
+    <string name="favorites_remove">Remove from Favorites</string>
+    <string name="favorites_add">Add to Favorites</string>
+    <string name="favorites_added">Added to Favorites</string>
+    <string name="favorites_removed">Removed from Favorites</string>
     <string name="download_game_failed_to_get_versions">Failed to get version: %s. Tap to retry.</string>
     <string name="download_game_type_release">Release</string>
     <string name="download_game_type_snapshot">Snapshot</string>

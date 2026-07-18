@@ -163,6 +163,13 @@
     <string name="download_category_saves">存檔</string>
     <string name="download_category_shaders">光影包</string>
     <string name="download_category_by_id">搜尋ID</string>
+    <string name="download_category_favorites">收藏</string>
+    <string name="favorites_empty">暫無收藏。點擊資源卡片上的心形圖示即可加入收藏。</string>
+    <string name="favorites_filter_all">全部</string>
+    <string name="favorites_remove">取消收藏</string>
+    <string name="favorites_add">加入收藏</string>
+    <string name="favorites_added">已加入收藏</string>
+    <string name="favorites_removed">已取消收藏</string>
     <string name="download_game_failed_to_get_versions">獲取版本失敗：%s，點擊重試。</string>
     <string name="download_game_type_release">正式版</string>
     <string name="download_game_type_snapshot">快照版</string>

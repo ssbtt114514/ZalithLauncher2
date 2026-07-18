@@ -56,6 +56,7 @@ import com.movtery.zalithlauncher.ui.components.fadeEdge
 import com.movtery.zalithlauncher.ui.screens.NestedNavKey
 import com.movtery.zalithlauncher.ui.screens.NormalNavKey
 import com.movtery.zalithlauncher.ui.screens.TitledNavKey
+import com.movtery.zalithlauncher.ui.screens.content.download.DownloadFavoritesScreen
 import com.movtery.zalithlauncher.ui.screens.content.download.DownloadGameScreen
 import com.movtery.zalithlauncher.ui.screens.content.download.DownloadModPackScreen
 import com.movtery.zalithlauncher.ui.screens.content.download.DownloadModScreen

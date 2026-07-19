@@ -200,6 +200,11 @@
     <string name="download_quick_download_shader_suggest_iris">No Iris/Oculus/OptiFine detected. It is recommended to install the Iris mod to enable shader effects.</string>
     <string name="download_quick_download_shader_suggest_oculus">No Iris/Oculus/OptiFine detected. It is recommended to install the Oculus mod to enable shader effects.</string>
     <string name="download_quick_download_shader_suggest_optifine">No Iris/Oculus/OptiFine detected. It is recommended to use the OptiFine client to enable shader effects.</string>
+    <string name="download_quick_download_required">Required</string>
+    <string name="download_quick_download_optional">Optional</string>
+    <string name="download_quick_download_incompatible_project">Incompatible</string>
+    <string name="download_quick_download_optional_list">Optional Dependencies</string>
+    <string name="download_quick_download_incompatible_list">Incompatible Mods</string>
     <string name="download_game_failed_to_get_versions">Failed to get version: %s. Tap to retry.</string>
     <string name="download_game_type_release">Release</string>
     <string name="download_game_type_snapshot">Snapshot</string>

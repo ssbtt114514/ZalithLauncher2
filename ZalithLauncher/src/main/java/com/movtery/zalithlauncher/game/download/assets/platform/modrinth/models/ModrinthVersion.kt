@@ -173,4 +173,6 @@ class ModrinthVersion(
     override fun platformFileSize(): Long = thisPrimaryFile.size
 
     override fun platformVersion(): String = versionNumber
+
+    override fun isFeatured(): Boolean = featured
 }

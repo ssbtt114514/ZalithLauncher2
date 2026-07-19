@@ -185,6 +185,11 @@
     <string name="download_quick_download_shader_suggest_iris">未檢測到 Iris/Oculus/OptiFine，建議安裝 Iris 模組以獲得光影效果</string>
     <string name="download_quick_download_shader_suggest_oculus">未檢測到 Iris/Oculus/OptiFine，建議安裝 Oculus 模組以獲得光影效果</string>
     <string name="download_quick_download_shader_suggest_optifine">未檢測到 Iris/Oculus/OptiFine，建議使用 OptiFine 用戶端以獲得光影效果</string>
+    <string name="download_quick_download_required">必需前置</string>
+    <string name="download_quick_download_optional">可選</string>
+    <string name="download_quick_download_incompatible_project">不相容</string>
+    <string name="download_quick_download_optional_list">可選前置</string>
+    <string name="download_quick_download_incompatible_list">不相容模組</string>
     <string name="download_game_failed_to_get_versions">獲取版本失敗：%s，點擊重試。</string>
     <string name="download_game_type_release">正式版</string>
     <string name="download_game_type_snapshot">快照版</string>

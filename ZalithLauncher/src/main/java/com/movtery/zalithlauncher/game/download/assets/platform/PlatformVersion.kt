@@ -102,6 +102,13 @@ interface PlatformVersion {
     fun platformVersion(): String
 
     /**
+     * 该版本是否为平台推荐的“星标/featured”版本。
+     * 仅 Modrinth 明确提供此字段；CurseForge 等其他平台默认返回 false。
+     */
+    fun isFeatured(): Boolean = false
+}
+
+    /**
      * 平台版本依赖项目类，保存依赖项关键信息
      * @param type 依赖类型
      */

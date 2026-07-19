@@ -53,7 +53,7 @@ android {
         val releaseKeystore = file("zalith_night.jks")
         create("releaseBuild") {
             storeFile = releaseKeystore
-            storePassword = defaultStorePassword
+            storePassword = defaultKeyPassword
             keyAlias = "ssbtt_nightly"
             keyPassword = defaultKeyPassword
         }

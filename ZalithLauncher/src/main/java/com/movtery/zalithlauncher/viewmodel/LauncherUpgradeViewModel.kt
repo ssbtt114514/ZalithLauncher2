@@ -18,35 +18,17 @@
 
 package com.movtery.zalithlauncher.viewmodel
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.movtery.zalithlauncher.BuildConfig
-import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.path.GLOBAL_CLIENT
 import com.movtery.zalithlauncher.path.GLOBAL_JSON
 import com.movtery.zalithlauncher.path.URL_PROJECT_INFO
 import com.movtery.zalithlauncher.setting.AllSettings
-import com.movtery.zalithlauncher.ui.components.MarqueeText
-import com.movtery.zalithlauncher.ui.components.SimpleListDialog
-import com.movtery.zalithlauncher.ui.screens.content.elements.DisabledAlpha
 import com.movtery.zalithlauncher.ui.upgrade.UpgradeDialog
 import com.movtery.zalithlauncher.ui.upgrade.UpgradeFilesDialog
 import com.movtery.zalithlauncher.upgrade.GithubContentApi
@@ -62,7 +44,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 private const val TAG = "LauncherUpgradeVM"
@@ -73,8 +54,6 @@ sealed interface LauncherUpgradeOperation {
     data class Upgrade(val data: RemoteData) : LauncherUpgradeOperation
     /** 选择要安装的安装包文件 */
     data class SelectApk(val data: RemoteData) : LauncherUpgradeOperation
-    /** 打开网盘分享 */
-    data class OpenCloudDrive(val cloudDrive: RemoteData.CloudDrive) : LauncherUpgradeOperation
 }
 
 /**
@@ -82,7 +61,6 @@ sealed interface LauncherUpgradeOperation {
  */
 private const val LATEST_VERSION = "latest_version_md.json"
 private const val LATEST_API_URL = "$URL_PROJECT_INFO/$LATEST_VERSION"
-private const val LATEST_API_CHINESE_URL = "https://repo.miawa.cn/zalith-info/v2/$LATEST_VERSION"
 
 /**
  * 用于记录启动器更新 ViewModel
@@ -200,21 +178,8 @@ class LauncherUpgradeViewModel: ViewModel() {
                     GLOBAL_JSON.decodeFromString(RemoteData.serializer(), contentString)
                 }
             }.getOrElse { e ->
-                if (Locale.getDefault().language == "zh") {
-                    runCatching {
-                        Logger.info(TAG, "Check for updates in the Chinese region.")
-                        //在中国地区，可能因为无法访问 Github API 导致获取更新信息失败
-                        withRetry(logTag = "LauncherUpgrade_Chinese", maxRetries = 2) {
-                            GLOBAL_CLIENT.get(LATEST_API_CHINESE_URL).safeBodyAsJson<RemoteData>()
-                        }
-                    }.getOrElse { e ->
-                        Logger.warning(TAG, "Failed to check for launcher upgrade!", e)
-                        null
-                    }
-                } else {
-                    Logger.warning(TAG, "Failed to check for launcher upgrade!", e)
-                    null
-                }
+                Logger.warning(TAG, "Failed to check for launcher upgrade!", e)
+                null
             }
         }
     }
@@ -275,10 +240,7 @@ fun LauncherUpgradeOperation(
                 onIgnored = {
                     onIgnoredClick(operation.data.code)
                 },
-                onLinkClick = onLinkClick,
-                onCloudDriveClick = { cloudDrive ->
-                    onChanged(LauncherUpgradeOperation.OpenCloudDrive(cloudDrive))
-                }
+                onLinkClick = onLinkClick
             )
         }
         is LauncherUpgradeOperation.SelectApk -> {
@@ -291,75 +253,6 @@ fun LauncherUpgradeOperation(
                     onLinkClick(file.uri)
                     onChanged(LauncherUpgradeOperation.None)
                 }
-            )
-        }
-        is LauncherUpgradeOperation.OpenCloudDrive -> {
-            val current by remember(operation) {
-                mutableStateOf<RemoteData.CloudDrive.Link?>(null)
-            }
-            SimpleListDialog(
-                title = stringResource(R.string.upgrade_cloud_drive),
-                items = operation.cloudDrive.links,
-                onItemSelected = { link ->
-                    onLinkClick(link.link)
-                },
-                onDismissRequest = {
-                    onChanged(LauncherUpgradeOperation.None)
-                },
-                current = current,
-                itemLayout = { item, isCurrent, onClick ->
-                    CloudDriveLayout(
-                        link = item,
-                        selected = isCurrent,
-                        onClick = onClick
-                    )
-                },
-                showConfirm = true,
-                confirmText = {
-                    MarqueeText(text = stringResource(R.string.generic_confirm))
-                }
-            )
-        }
-    }
-}
-
-
-@Composable
-private fun CloudDriveLayout(
-    link: RemoteData.CloudDrive.Link,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-) {
-    Row(
-        modifier = modifier
-            .clip(shape = MaterialTheme.shapes.large)
-            .clickable(enabled = enabled, onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        RadioButton(
-            selected = selected,
-            onClick = onClick,
-            enabled = enabled
-        )
-        Column(
-            modifier = Modifier.alpha(if (enabled) 1.0f else DisabledAlpha),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            //网盘名称
-            MarqueeText(
-                modifier = Modifier.fillMaxWidth(),
-                text = link.name,
-                style = MaterialTheme.typography.labelMedium
-            )
-            //网盘链接
-            MarqueeText(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .alpha(0.7f),
-                text = link.link,
-                style = MaterialTheme.typography.labelSmall
             )
         }
     }

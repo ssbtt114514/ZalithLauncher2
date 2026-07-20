@@ -48,7 +48,6 @@ import com.movtery.zalithlauncher.ui.theme.cardColor
 import com.movtery.zalithlauncher.ui.theme.onCardColor
 import com.movtery.zalithlauncher.upgrade.RemoteData
 import com.movtery.zalithlauncher.upgrade.findCurrentBody
-import com.movtery.zalithlauncher.upgrade.getCurrentCouldDrive
 import com.movtery.zalithlauncher.utils.formatDate
 import java.util.Locale
 
@@ -59,13 +58,9 @@ fun UpgradeDialog(
     onFilesClick: () -> Unit,
     onIgnored: () -> Unit,
     onLinkClick: (String) -> Unit,
-    onCloudDriveClick: (RemoteData.CloudDrive) -> Unit
 ) {
     val body = remember(data) {
         data.findCurrentBody(Locale.getDefault()) ?: data.defaultBody
-    }
-    val cloudDrive = remember(data) {
-        data.getCurrentCouldDrive(Locale.getDefault())
     }
 
     Dialog(
@@ -129,26 +124,7 @@ fun UpgradeDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (cloudDrive == null) {
-                        Spacer(Modifier.weight(1f))
-                    } else {
-                        FilledTonalButton(
-                            onClick = {
-                                if (cloudDrive.links.isEmpty()) {
-                                    //未配置多网盘链接，使用默认链接（旧版兼容，必定会有）
-                                    onLinkClick(cloudDrive.link)
-                                } else if (cloudDrive.links.size == 1) {
-                                    //只有一个网盘链接，则直接访问链接
-                                    onLinkClick(cloudDrive.links[0].link)
-                                } else {
-                                    onCloudDriveClick(cloudDrive)
-                                }
-                            }
-                        ) {
-                            Text(text = stringResource(R.string.upgrade_cloud_drive))
-                        }
-                        Spacer(Modifier.weight(1f))
-                    }
+                    Spacer(Modifier.weight(1f))
 
                     FilledTonalButton(
                         onClick = {
